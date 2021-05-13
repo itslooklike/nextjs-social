@@ -12,7 +12,7 @@ const connectDb = require('./src/utilsServer/connectDb')
 
 const PORT = process.env.PORT || 3000
 
-connectDb()
+// connectDb()
 
 nextApp.prepare().then(() => {
   app.all('*', (req, res) => handle(req, res))
@@ -25,3 +25,7 @@ nextApp.prepare().then(() => {
     console.log(`server run on: http://localhost:${PORT}`)
   })
 })
+
+// - app
+// - server
+// - nextApp
