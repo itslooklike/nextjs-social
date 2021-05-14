@@ -1,5 +1,18 @@
-import mongoose from 'mongoose'
-const Schema = mongoose.Schema
+import mongoose, { Schema } from 'mongoose'
+import type { IUserDocument } from './UserModel'
+
+export interface IProfile {
+  user: IUserDocument['_id']
+  bio: string
+  social: {
+    youtube?: string
+    twitter?: string
+    facebook?: string
+    instagram?: string
+  }
+}
+
+interface IProfileBaseDocument extends IProfile, Document {}
 
 const ProfileSchema = new Schema(
   {
@@ -23,4 +36,4 @@ const ProfileSchema = new Schema(
   }
 )
 
-export default mongoose.model('Profile', ProfileSchema)
+export default mongoose.model<IProfileBaseDocument>('Profile', ProfileSchema)
