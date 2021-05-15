@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 import http from 'http'
 import next from 'next'
 import express from 'express'
-// import connectDb from '~/utilsServer/connectDb'
+import connectDb from '~/utilsServer/connectDb'
 import signupRouter from '~/api/signup'
 import authRouter from '~/api/auth'
 
@@ -18,7 +18,7 @@ const handle = nextApp.getRequestHandler()
 
 const PORT = process.env.PORT || 3000
 
-// connectDb()
+connectDb()
 
 nextApp.prepare().then(() => {
   app.use('/api/signup', signupRouter)

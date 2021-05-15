@@ -15,15 +15,15 @@ const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/
 router.get('/:username', async (req, res) => {
   const { username } = req.params
 
+  if (username.length < 1) {
+    return res.status(401).send('Invalid')
+  }
+
+  if (!regexUserName.test(username)) {
+    return res.status(401).send('Invalid')
+  }
+
   try {
-    if (username.length < 1) {
-      return res.status(401).send('Invalid')
-    }
-
-    if (!regexUserName.test(username)) {
-      return res.status(401).send('Invalid')
-    }
-
     const user = await UserModel.findOne({ username: username.toLowerCase() })
 
     if (user) {
