@@ -240,9 +240,7 @@ router.post('/settings/messagePopup', authMiddleware, async (req, res) => {
 
     if (user.newMessagePopup) {
       user.newMessagePopup = false
-    }
-    //
-    else {
+    } else {
       user.newMessagePopup = true
     }
 

@@ -68,6 +68,7 @@ router.post('/', async (req, res) => {
     profileFields.bio = bio
 
     profileFields.social = {}
+
     if (facebook) profileFields.social.facebook = facebook
     if (youtube) profileFields.social.youtube = youtube
     if (instagram) profileFields.social.instagram = instagram
