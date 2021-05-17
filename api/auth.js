@@ -3,9 +3,8 @@ import { sign } from 'jsonwebtoken'
 import { compare } from 'bcryptjs'
 import { isEmail } from 'validator'
 
-import { UserModel } from '../models/UserModel'
-import { FollowerModel } from '../models/FollowerModel'
-import authMiddleware from '../middleware/authMiddleware'
+import { UserModel, FollowerModel } from '../models'
+import { authMiddleware } from '../middleware'
 
 const router = Router()
 
@@ -27,10 +26,12 @@ router.get('/', authMiddleware, async (req, res) => {
 router.post('/', async (req, res) => {
   const { email, password } = req.body.user
 
-  if (!isEmail(email)) return res.status(401).send('Invalid Email')
+  if (!isEmail(email)) {
+    return res.status(401).send('Invalid Email')
+  }
 
   if (password.length < 6) {
-    return res.status(401).send('Password must be atleast 6 characters')
+    return res.status(401).send('Password must be at least 6 characters')
   }
 
   try {
@@ -41,13 +42,18 @@ router.post('/', async (req, res) => {
     }
 
     const isPassword = await compare(password, user.password)
+
     if (!isPassword) {
       return res.status(401).send('Invalid Credentials')
     }
 
     const payload = { userId: user._id }
+
     sign(payload, process.env.jwtSecret, { expiresIn: '2d' }, (err, token) => {
-      if (err) throw err
+      if (err) {
+        throw err
+      }
+
       res.status(200).json(token)
     })
   } catch (error) {

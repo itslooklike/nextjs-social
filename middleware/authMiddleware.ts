@@ -1,6 +1,6 @@
 import { verify } from 'jsonwebtoken'
 
-export default (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
   try {
     if (!req.headers.authorization) {
       return res.status(401).send(`Unauthorized`)

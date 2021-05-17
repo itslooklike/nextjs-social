@@ -2,7 +2,7 @@ import { Router } from 'express'
 
 import { findOne } from '../models/ChatModel'
 import { UserModel } from '../models/UserModel'
-import authMiddleware from '../middleware/authMiddleware'
+import { authMiddleware } from '../middleware'
 
 const router = Router()
 

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { v4 as uuid } from 'uuid'
 
-import authMiddleware from '../middleware/authMiddleware'
+import { authMiddleware } from '../middleware'
 import { UserModel } from '../models/UserModel'
 import { findOne } from '../models/FollowerModel'
 import PostModel, { findById as _findById, find } from '../models/PostModel'

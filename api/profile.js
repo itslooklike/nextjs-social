@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { compare, hash } from 'bcryptjs'
 
-import authMiddleware from '../middleware/authMiddleware'
+import { authMiddleware } from '../middleware'
 import { UserModel } from '../models/UserModel'
 import { find } from '../models/PostModel'
 import { findOne as _findOne } from '../models/FollowerModel'

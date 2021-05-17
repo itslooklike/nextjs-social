@@ -1,6 +1,6 @@
 import { Router } from 'express'
 const router = Router()
-import authMiddleware from '../middleware/authMiddleware'
+import { authMiddleware } from '../middleware'
 import { findOne } from '../models/NotificationModel'
 import { UserModel } from '../models/UserModel'
 
