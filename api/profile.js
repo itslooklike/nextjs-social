@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { compare, hash } from 'bcryptjs'
 
 import authMiddleware from '../middleware/authMiddleware'
-import { findOne, findById } from '../models/UserModel'
+import { UserModel } from '../models/UserModel'
 import { find } from '../models/PostModel'
 import { findOne as _findOne } from '../models/FollowerModel'
 import { findOne as __findOne, findOneAndUpdate } from '../models/ProfileModel'
@@ -17,7 +17,7 @@ router.get('/:username', authMiddleware, async (req, res) => {
   try {
     const { username } = req.params
 
-    const user = await findOne({ username: username.toLowerCase() })
+    const user = await UserModel.findOne({ username: username.toLowerCase() })
     if (!user) {
       return res.status(404).send('No User Found')
     }
@@ -45,7 +45,7 @@ router.get(`/posts/:username`, authMiddleware, async (req, res) => {
   try {
     const { username } = req.params
 
-    const user = await findOne({ username: username.toLowerCase() })
+    const user = await UserModel.findOne({ username: username.toLowerCase() })
     if (!user) {
       return res.status(404).send('No User Found')
     }
@@ -196,7 +196,7 @@ router.post('/update', authMiddleware, async (req, res) => {
     await findOneAndUpdate({ user: userId }, { $set: profileFields }, { new: true })
 
     if (profilePicUrl) {
-      const user = await findById(userId)
+      const user = await UserModel.findById(userId)
       user.profilePicUrl = profilePicUrl
       await user.save()
     }
@@ -216,7 +216,7 @@ router.post('/settings/password', authMiddleware, async (req, res) => {
       return res.status(400).send('Password must be atleast 6 characters')
     }
 
-    const user = await findById(req.userId).select('+password')
+    const user = await UserModel.findById(req.userId).select('+password')
 
     const isPassword = await compare(currentPassword, user.password)
 
@@ -236,7 +236,7 @@ router.post('/settings/password', authMiddleware, async (req, res) => {
 
 router.post('/settings/messagePopup', authMiddleware, async (req, res) => {
   try {
-    const user = await findById(req.userId)
+    const user = await UserModel.findById(req.userId)
 
     if (user.newMessagePopup) {
       user.newMessagePopup = false

@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { v4 as uuid } from 'uuid'
 
 import authMiddleware from '../middleware/authMiddleware'
-import { findById } from '../models/UserModel'
+import { UserModel } from '../models/UserModel'
 import { findOne } from '../models/FollowerModel'
 import PostModel, { findById as _findById, find } from '../models/PostModel'
 import {
@@ -126,7 +126,7 @@ router.delete('/:postId', authMiddleware, async (req, res) => {
       return res.status(404).send('post not found')
     }
 
-    const user = await findById(userId)
+    const user = await UserModel.findById(userId)
 
     if (post.user.toString() !== userId) {
       if (user.role === 'root') {
@@ -271,7 +271,7 @@ router.delete('/:postId/:commentId', authMiddleware, async (req, res) => {
       return res.status(404).send('No Comment found')
     }
 
-    const user = await findById(userId)
+    const user = await UserModel.findById(userId)
 
     const deleteComment = async () => {
       const indexOf = post.comments.map((comment) => comment._id).indexOf(commentId)

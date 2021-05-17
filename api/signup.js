@@ -3,7 +3,7 @@ import { sign } from 'jsonwebtoken'
 import { hash } from 'bcryptjs'
 import isEmail from 'validator/lib/isEmail'
 
-import UserModel, { findOne } from '../models/UserModel'
+import { UserModel } from '../models/UserModel'
 import ProfileModel from '../models/ProfileModel'
 import FollowerModel from '../models/FollowerModel'
 import NotificationModel from '../models/NotificationModel'
@@ -23,7 +23,7 @@ router.get('/:username', async (req, res) => {
 
     if (!regexUserName.test(username)) return res.status(401).send('Invalid')
 
-    const user = await findOne({ username: username.toLowerCase() })
+    const user = await UserModel.findOne({ username: username.toLowerCase() })
 
     if (user) return res.status(401).send('Username already taken')
 
@@ -46,7 +46,7 @@ router.post('/', async (req, res) => {
 
   try {
     let user
-    user = await findOne({ email: email.toLowerCase() })
+    user = await UserModel.findOne({ email: email.toLowerCase() })
     if (user) {
       return res.status(401).send('User already registered')
     }

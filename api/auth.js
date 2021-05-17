@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import { sign } from 'jsonwebtoken'
 import { compare } from 'bcryptjs'
-import isEmail from 'validator/lib/isEmail'
+import { isEmail } from 'validator'
 
-import { findById, findOne } from '../models/UserModel'
-import { findOne as _findOne } from '../models/FollowerModel'
+import { UserModel } from '../models/UserModel'
+import { FollowerModel } from '../models/FollowerModel'
 import authMiddleware from '../middleware/authMiddleware'
 
 const router = Router()
@@ -13,9 +13,9 @@ router.get('/', authMiddleware, async (req, res) => {
   const { userId } = req
 
   try {
-    const user = await findById(userId)
+    const user = await UserModel.findById(userId)
 
-    const userFollowStats = await _findOne({ user: userId })
+    const userFollowStats = await FollowerModel.findOne({ user: userId })
 
     return res.status(200).json({ user, userFollowStats })
   } catch (error) {
@@ -34,7 +34,7 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const user = await findOne({ email: email.toLowerCase() }).select('+password')
+    const user = await UserModel.findOne({ email: email.toLowerCase() }).select('+password')
 
     if (!user) {
       return res.status(401).send('Invalid Credentials')

@@ -14,4 +14,4 @@ const FollowerSchema = new Schema({
   ],
 })
 
-export default model('Follower', FollowerSchema)
+export const FollowerModel = model('Follower', FollowerSchema)

@@ -37,6 +37,9 @@
   },
   "devDependencies": {
     "@types/react": "^17.0.5",
+    "@typescript-eslint/eslint-plugin": "^4.24.0",
+    "@typescript-eslint/parser": "^4.24.0",
+    "eslint": "^7.26.0",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.0",
     "ts-node": "^9.1.1",

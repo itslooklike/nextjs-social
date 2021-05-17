@@ -2,7 +2,7 @@ import { Router } from 'express'
 const router = Router()
 import authMiddleware from '../middleware/authMiddleware'
 import { findOne } from '../models/NotificationModel'
-import { findById } from '../models/UserModel'
+import { UserModel } from '../models/UserModel'
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
@@ -23,7 +23,7 @@ router.post('/', authMiddleware, async (req, res) => {
   try {
     const { userId } = req
 
-    const user = await findById(userId)
+    const user = await UserModel.findById(userId)
 
     if (user.unreadNotification) {
       user.unreadNotification = false

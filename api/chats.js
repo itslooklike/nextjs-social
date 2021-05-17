@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { findOne } from '../models/ChatModel'
-import { findById } from '../models/UserModel'
+import { UserModel } from '../models/UserModel'
 import authMiddleware from '../middleware/authMiddleware'
 
 const router = Router()
@@ -33,7 +33,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
 router.get('/user/:userToFindId', authMiddleware, async (req, res) => {
   try {
-    const user = await findById(req.params.userToFindId)
+    const user = await UserModel.findById(req.params.userToFindId)
 
     if (!user) {
       return res.status(404).send('No User found')

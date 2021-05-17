@@ -1,9 +1,9 @@
-import { findById } from '../models/UserModel'
+import { UserModel } from '../models/UserModel'
 import { findOne } from '../models/NotificationModel'
 
 export const setNotificationToUnread = async (userId) => {
   try {
-    const user = await findById(userId)
+    const user = await UserModel.findById(userId)
 
     if (!user.unreadNotification) {
       user.unreadNotification = true

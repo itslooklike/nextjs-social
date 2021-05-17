@@ -5,7 +5,7 @@ import sendGridTransport from 'nodemailer-sendgrid-transport'
 import { randomBytes } from 'crypto'
 import isEmail from 'validator/lib/isEmail'
 
-import { findOne } from '../models/UserModel'
+import { UserModel } from '../models/UserModel'
 import baseUrl from '../utils/baseUrl'
 
 const router = Router()
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
       return res.status(401).send('Invalid Email')
     }
 
-    const user = await findOne({ email: email.toLowerCase() })
+    const user = await UserModel.findOne({ email: email.toLowerCase() })
 
     if (!user) {
       return res.status(404).send('User not found')
@@ -70,7 +70,7 @@ router.post('/token', async (req, res) => {
 
     if (password.length < 6) return res.status(401).send('Password must be atleast 6 characters')
 
-    const user = await findOne({ resetToken: token })
+    const user = await UserModel.findOne({ resetToken: token })
 
     if (!user) {
       return res.status(404).send('User not found')
@@ -83,6 +83,7 @@ router.post('/token', async (req, res) => {
     user.password = await hash(password, 10)
 
     user.resetToken = ''
+
     user.expireToken = undefined
 
     await user.save()

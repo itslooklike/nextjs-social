@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('likePost', async ({ postId, userId, like }) => {
-    const { success, name, profilePicUrl, username, postByUserId, error } = await likeOrUnlikePost(
+    const { success, name, profilePicUrl, username, postByUserId } = await likeOrUnlikePost(
       postId,
       userId,
       like
@@ -58,7 +58,6 @@ io.on('connection', (socket) => {
         const receiverSocket = findConnectedUser(postByUserId)
 
         if (receiverSocket && like) {
-          // WHEN YOU WANT TO SEND DATA TO ONE PARTICULAR CLIENT
           io.to(receiverSocket.socketId).emit('newNotificationReceived', {
             name,
             profilePicUrl,
@@ -81,11 +80,8 @@ io.on('connection', (socket) => {
     const receiverSocket = findConnectedUser(msgSendToUserId)
 
     if (receiverSocket) {
-      // WHEN YOU WANT TO SEND MESSAGE TO A PARTICULAR SOCKET
       io.to(receiverSocket.socketId).emit('newMsgReceived', { newMsg })
-    }
-    //
-    else {
+    } else {
       await setMsgToUnread(msgSendToUserId)
     }
 
@@ -103,11 +99,8 @@ io.on('connection', (socket) => {
     const receiverSocket = findConnectedUser(msgSendToUserId)
 
     if (receiverSocket) {
-      // WHEN YOU WANT TO SEND MESSAGE TO A PARTICULAR SOCKET
       io.to(receiverSocket.socketId).emit('newMsgReceived', { newMsg })
-    }
-    //
-    else {
+    } else {
       await setMsgToUnread(msgSendToUserId)
     }
 
