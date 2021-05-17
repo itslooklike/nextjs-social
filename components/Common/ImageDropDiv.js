@@ -76,7 +76,7 @@ function ImageDropDiv({
           >
             {mediaPreview === null ? (
               <>
-                <Segment color={highlighted ? 'green' : ''} placeholder basic>
+                <Segment color={highlighted ? 'green' : undefined} placeholder basic>
                   {checkForSignupPage()}
                 </Segment>
               </>
