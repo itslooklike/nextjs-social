@@ -8,6 +8,6 @@
 
 ## docker
 
-```sg
+```sh
 docker-compose up
 ```

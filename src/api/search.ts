@@ -5,17 +5,19 @@ import { UserModel } from '~/models'
 
 const router = Router()
 
-router.get('/:searchText', authMiddleware, async (req, res) => {
+router.get(`/:searchText`, authMiddleware, async (req, res) => {
   try {
     const { searchText } = req.params
-    const { userId } = req
+    const { userId } = res.locals
 
-    if (searchText.length === 0) return
+    if (searchText.length === 0) {
+      return
+    }
 
-    let userPattern = new RegExp(`^${searchText}`)
+    const userPattern = new RegExp(`^${searchText}`)
 
     const results = await UserModel.find({
-      name: { $regex: userPattern, $options: 'i' },
+      name: { $regex: userPattern, $options: `i` },
     })
 
     const resultsToBeSent =

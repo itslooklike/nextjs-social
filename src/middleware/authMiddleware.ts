@@ -1,9 +1,10 @@
 import { verify } from 'jsonwebtoken'
+import type { Request, Response } from 'express'
 
 /**
  * Проверяет `headers.authorization` на валидность токена
  */
-export const authMiddleware = (req, res, next) => {
+export const authMiddleware = (req: Request, res: Response, next) => {
   try {
     if (!req.headers.authorization) {
       return res.status(401).send(`Unauthorized`)
@@ -11,7 +12,7 @@ export const authMiddleware = (req, res, next) => {
 
     const { userId } = verify(req.headers.authorization, process.env.jwtSecret)
 
-    req.userId = userId
+    res.locals.userId = userId
 
     next()
   } catch (error) {

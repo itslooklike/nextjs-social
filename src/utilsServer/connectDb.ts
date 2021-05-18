@@ -8,7 +8,7 @@ async function connectDb() {
       useCreateIndex: true,
       useFindAndModify: false,
     })
-    console.log('Mongodb connected')
+    console.log(`Mongodb connected`)
   } catch (error) {
     console.log(error)
     process.exit(1)

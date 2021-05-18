@@ -8,8 +8,8 @@ import { authMiddleware } from '~/middleware'
 
 export const routerAuth = Router()
 
-routerAuth.get('/', authMiddleware, async (req, res) => {
-  const { userId } = req
+routerAuth.get(`/`, authMiddleware, async (req, res) => {
+  const { userId } = res.locals
 
   try {
     const user = await UserModel.findById(userId)
@@ -23,37 +23,37 @@ routerAuth.get('/', authMiddleware, async (req, res) => {
   }
 })
 
-routerAuth.post('/', async (req, res) => {
+routerAuth.post(`/`, async (req, res) => {
   const { email, password } = req.body.user
 
   if (!email || !password) {
-    return res.status(401).send('No "email" and/or "password" send')
+    return res.status(401).send(`No "email" and/or "password" send`)
   }
 
   if (!isEmail(email)) {
-    return res.status(401).send('Invalid Email')
+    return res.status(401).send(`Invalid Email`)
   }
 
   if (password.length < 6) {
-    return res.status(401).send('Password must be at least 6 characters')
+    return res.status(401).send(`Password must be at least 6 characters`)
   }
 
   try {
-    const user = await UserModel.findOne({ email: email.toLowerCase() }).select('+password')
+    const user = await UserModel.findOne({ email: email.toLowerCase() }).select(`+password`)
 
     if (!user) {
-      return res.status(401).send('Invalid Credentials')
+      return res.status(401).send(`Invalid Credentials`)
     }
 
     const isPassword = await compare(password, user.password)
 
     if (!isPassword) {
-      return res.status(401).send('Invalid Credentials')
+      return res.status(401).send(`Invalid Credentials`)
     }
 
     const payload = { userId: user._id }
 
-    sign(payload, process.env.jwtSecret, { expiresIn: '2d' }, (err, token) => {
+    sign(payload, process.env.jwtSecret, { expiresIn: `2d` }, (err, token) => {
       if (err) {
         throw err
       }

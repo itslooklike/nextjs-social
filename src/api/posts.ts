@@ -12,14 +12,16 @@ import {
 
 const router = Router()
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post(`/`, authMiddleware, async (req, res) => {
   const { text, location, picUrl } = req.body
 
-  if (text.length < 1) return res.status(401).send('Text must be atleast 1 character')
+  if (text.length < 1) {
+    return res.status(401).send(`Text must be atleast 1 character`)
+  }
 
   try {
     const newPost: any = {
-      user: req.userId,
+      user: res.locals.userId,
       text,
     }
 
@@ -33,7 +35,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const post = await new PostModel(newPost).save()
 
-    const postCreated = await PostModel.findById(post._id).populate('user')
+    const postCreated = await PostModel.findById(post._id).populate(`user`)
 
     return res.json(postCreated)
   } catch (error) {
@@ -42,7 +44,7 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 })
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get(`/`, authMiddleware, async (req, res) => {
   const { pageNumber } = req.query
 
   const number = Number(pageNumber)
@@ -55,8 +57,8 @@ router.get('/', authMiddleware, async (req, res) => {
       posts = await PostModel.find()
         .limit(size)
         .sort({ createdAt: -1 })
-        .populate('user')
-        .populate('comments.user')
+        .populate(`user`)
+        .populate(`comments.user`)
     }
     //
     else {
@@ -65,8 +67,8 @@ router.get('/', authMiddleware, async (req, res) => {
         .skip(skips)
         .limit(size)
         .sort({ createdAt: -1 })
-        .populate('user')
-        .populate('comments.user')
+        .populate(`user`)
+        .populate(`comments.user`)
     }
 
     if (posts.length === 0) {
@@ -74,24 +76,29 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 
     let postsToBeSent = []
-    const { userId } = req
+
+    const { userId } = res.locals
 
     const loggedUser = await FollowerModel.findOne({ user: userId })
 
     if (loggedUser.following.length === 0) {
       postsToBeSent = posts.filter((post) => post.user._id.toString() === userId)
-    }
-    //
-    else {
+    } else {
       for (let i = 0; i < loggedUser.following.length; i++) {
         const foundPostsFromFollowing = posts.filter(
           (post) => post.user._id.toString() === loggedUser.following[i].user.toString()
         )
 
-        if (foundPostsFromFollowing.length > 0) postsToBeSent.push(...foundPostsFromFollowing)
+        if (foundPostsFromFollowing.length > 0) {
+          postsToBeSent.push(...foundPostsFromFollowing)
+        }
       }
+
       const foundOwnPosts = posts.filter((post) => post.user._id.toString() === userId)
-      if (foundOwnPosts.length > 0) postsToBeSent.push(...foundOwnPosts)
+
+      if (foundOwnPosts.length > 0) {
+        postsToBeSent.push(...foundOwnPosts)
+      }
     }
 
     postsToBeSent.length > 0 &&
@@ -108,14 +115,14 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
-router.get('/:postId', authMiddleware, async (req, res) => {
+router.get(`/:postId`, authMiddleware, async (req, res) => {
   try {
     const post = await PostModel.findById(req.params.postId)
-      .populate('user')
-      .populate('comments.user')
+      .populate(`user`)
+      .populate(`comments.user`)
 
     if (!post) {
-      return res.status(404).send('Post not found')
+      return res.status(404).send(`Post not found`)
     }
 
     return res.json(post)
@@ -125,50 +132,50 @@ router.get('/:postId', authMiddleware, async (req, res) => {
   }
 })
 
-router.delete('/:postId', authMiddleware, async (req, res) => {
+router.delete(`/:postId`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req
+    const { userId } = res.locals
 
     const { postId } = req.params
 
     const post = await PostModel.findById(postId)
     if (!post) {
-      return res.status(404).send('post not found')
+      return res.status(404).send(`post not found`)
     }
 
     const user = await UserModel.findById(userId)
 
     if (post.user.toString() !== userId) {
-      if (user.role === 'root') {
+      if (user.role === `root`) {
         await post.remove()
-        return res.status(200).send('Post deleted Successfully')
+        return res.status(200).send(`Post deleted Successfully`)
       } else {
-        return res.status(401).send('Unauthorized')
+        return res.status(401).send(`Unauthorized`)
       }
     }
 
     await post.remove()
-    return res.status(200).send('Post deleted Successfully')
+    return res.status(200).send(`Post deleted Successfully`)
   } catch (error) {
     console.error(error)
     return res.status(500).send(`Server error`)
   }
 })
 
-router.post('/like/:postId', authMiddleware, async (req, res) => {
+router.post(`/like/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
-    const { userId } = req
+    const { userId } = res.locals
 
     const post = await PostModel.findById(postId)
     if (!post) {
-      return res.status(404).send('No Post found')
+      return res.status(404).send(`No Post found`)
     }
 
     const isLiked = post.likes.filter((like) => like.user.toString() === userId).length > 0
 
     if (isLiked) {
-      return res.status(401).send('Post already liked')
+      return res.status(401).send(`Post already liked`)
     }
 
     await post.likes.unshift({ user: userId })
@@ -178,27 +185,27 @@ router.post('/like/:postId', authMiddleware, async (req, res) => {
       await newLikeNotification(userId, postId, post.user.toString())
     }
 
-    return res.status(200).send('Post liked')
+    return res.status(200).send(`Post liked`)
   } catch (error) {
     console.error(error)
     return res.status(500).send(`Server error`)
   }
 })
 
-router.put('/unlike/:postId', authMiddleware, async (req, res) => {
+router.put(`/unlike/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
-    const { userId } = req
+    const { userId } = res.locals
 
     const post = await PostModel.findById(postId)
     if (!post) {
-      return res.status(404).send('No Post found')
+      return res.status(404).send(`No Post found`)
     }
 
     const isLiked = post.likes.filter((like) => like.user.toString() === userId).length === 0
 
     if (isLiked) {
-      return res.status(401).send('Post not liked before')
+      return res.status(401).send(`Post not liked before`)
     }
 
     const index = post.likes.map((like) => like.user.toString()).indexOf(userId)
@@ -211,20 +218,20 @@ router.put('/unlike/:postId', authMiddleware, async (req, res) => {
       await removeLikeNotification(userId, postId, post.user.toString())
     }
 
-    return res.status(200).send('Post Unliked')
+    return res.status(200).send(`Post Unliked`)
   } catch (error) {
     console.error(error)
     return res.status(500).send(`Server error`)
   }
 })
 
-router.get('/like/:postId', authMiddleware, async (req, res) => {
+router.get(`/like/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
 
-    const post = await PostModel.findById(postId).populate('likes.user')
+    const post = await PostModel.findById(postId).populate(`likes.user`)
     if (!post) {
-      return res.status(404).send('No Post found')
+      return res.status(404).send(`No Post found`)
     }
 
     return res.status(200).json(post.likes)
@@ -234,18 +241,22 @@ router.get('/like/:postId', authMiddleware, async (req, res) => {
   }
 })
 
-router.post('/comment/:postId', authMiddleware, async (req, res) => {
+router.post(`/comment/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
 
-    const { userId } = req
+    const { userId } = res.locals
     const { text } = req.body
 
-    if (text.length < 1) return res.status(401).send('Comment should be atleast 1 character')
+    if (text.length < 1) {
+      return res.status(401).send(`Comment should be atleast 1 character`)
+    }
 
     const post = await PostModel.findById(postId)
 
-    if (!post) return res.status(404).send('Post not found')
+    if (!post) {
+      return res.status(404).send(`Post not found`)
+    }
 
     const newComment = {
       _id: uuid(),
@@ -268,17 +279,19 @@ router.post('/comment/:postId', authMiddleware, async (req, res) => {
   }
 })
 
-router.delete('/:postId/:commentId', authMiddleware, async (req, res) => {
+router.delete(`/:postId/:commentId`, authMiddleware, async (req, res) => {
   try {
     const { postId, commentId } = req.params
-    const { userId } = req
+    const { userId } = res.locals
 
     const post = await PostModel.findById(postId)
-    if (!post) return res.status(404).send('Post not found')
+    if (!post) {
+      return res.status(404).send(`Post not found`)
+    }
 
     const comment = post.comments.find((comment) => comment._id === commentId)
     if (!comment) {
-      return res.status(404).send('No Comment found')
+      return res.status(404).send(`No Comment found`)
     }
 
     const user = await UserModel.findById(userId)
@@ -294,14 +307,14 @@ router.delete('/:postId/:commentId', authMiddleware, async (req, res) => {
         await removeCommentNotification(postId, commentId, userId, post.user.toString())
       }
 
-      return res.status(200).send('Deleted Successfully')
+      return res.status(200).send(`Deleted Successfully`)
     }
 
     if (comment.user.toString() !== userId) {
-      if (user.role === 'root') {
+      if (user.role === `root`) {
         await deleteComment()
       } else {
-        return res.status(401).send('Unauthorized')
+        return res.status(401).send(`Unauthorized`)
       }
     }
 

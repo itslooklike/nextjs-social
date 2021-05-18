@@ -13,9 +13,8 @@
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,
-
     "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "strict": false,
     "target": "es5"
   },

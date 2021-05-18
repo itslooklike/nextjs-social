@@ -10,16 +10,16 @@ import {
 
 const router = Router()
 
-router.get('/:username', authMiddleware, async (req, res) => {
+router.get(`/:username`, authMiddleware, async (req, res) => {
   try {
     const { username } = req.params
 
     const user = await UserModel.findOne({ username: username.toLowerCase() })
     if (!user) {
-      return res.status(404).send('No User Found')
+      return res.status(404).send(`No User Found`)
     }
 
-    const profile = await ProfileModel.findOne({ user: user._id }).populate('user')
+    const profile = await ProfileModel.findOne({ user: user._id }).populate(`user`)
 
     const profileFollowStats = await FollowerModel.findOne({ user: user._id })
 
@@ -34,7 +34,7 @@ router.get('/:username', authMiddleware, async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
@@ -44,57 +44,57 @@ router.get(`/posts/:username`, authMiddleware, async (req, res) => {
 
     const user = await UserModel.findOne({ username: username.toLowerCase() })
     if (!user) {
-      return res.status(404).send('No User Found')
+      return res.status(404).send(`No User Found`)
     }
 
     const posts = await PostModel.find({ user: user._id })
       .sort({ createdAt: -1 })
-      .populate('user')
-      .populate('comments.user')
+      .populate(`user`)
+      .populate(`comments.user`)
 
     return res.json(posts)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.get('/followers/:userId', authMiddleware, async (req, res) => {
+router.get(`/followers/:userId`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params
+    const { userId } = res.locals.params
 
-    const user = await FollowerModel.findOne({ user: userId }).populate('followers.user')
+    const user = await FollowerModel.findOne({ user: userId }).populate(`followers.user`)
 
     return res.json(user.followers)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.get('/following/:userId', authMiddleware, async (req, res) => {
+router.get(`/following/:userId`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params
+    const { userId } = res.locals.params
 
-    const user = await FollowerModel.findOne({ user: userId }).populate('following.user')
+    const user = await FollowerModel.findOne({ user: userId }).populate(`following.user`)
 
     return res.json(user.following)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.post('/follow/:userToFollowId', authMiddleware, async (req, res) => {
+router.post(`/follow/:userToFollowId`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req
+    const { userId } = res.locals
     const { userToFollowId } = req.params
 
     const user = await FollowerModel.findOne({ user: userId })
     const userToFollow = await FollowerModel.findOne({ user: userToFollowId })
 
     if (!user || !userToFollow) {
-      return res.status(404).send('User not found')
+      return res.status(404).send(`User not found`)
     }
 
     const isFollowing =
@@ -102,7 +102,7 @@ router.post('/follow/:userToFollowId', authMiddleware, async (req, res) => {
       user.following.filter((following) => following.user.toString() === userToFollowId).length > 0
 
     if (isFollowing) {
-      return res.status(401).send('User Already Followed')
+      return res.status(401).send(`User Already Followed`)
     }
 
     await user.following.unshift({ user: userToFollowId })
@@ -113,16 +113,16 @@ router.post('/follow/:userToFollowId', authMiddleware, async (req, res) => {
 
     await newFollowerNotification(userId, userToFollowId)
 
-    return res.status(200).send('Updated')
+    return res.status(200).send(`Updated`)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.put('/unfollow/:userToUnfollowId', authMiddleware, async (req, res) => {
+router.put(`/unfollow/:userToUnfollowId`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req
+    const { userId } = res.locals
     const { userToUnfollowId } = req.params
 
     const user = await FollowerModel.findOne({
@@ -134,7 +134,7 @@ router.put('/unfollow/:userToUnfollowId', authMiddleware, async (req, res) => {
     })
 
     if (!user || !userToUnfollow) {
-      return res.status(404).send('User not found')
+      return res.status(404).send(`User not found`)
     }
 
     const isFollowing =
@@ -143,7 +143,7 @@ router.put('/unfollow/:userToUnfollowId', authMiddleware, async (req, res) => {
         .length === 0
 
     if (isFollowing) {
-      return res.status(401).send('User Not Followed before')
+      return res.status(401).send(`User Not Followed before`)
     }
 
     const removeFollowing = await user.following
@@ -162,20 +162,20 @@ router.put('/unfollow/:userToUnfollowId', authMiddleware, async (req, res) => {
 
     await removeFollowerNotification(userId, userToUnfollowId)
 
-    return res.status(200).send('Updated')
+    return res.status(200).send(`Updated`)
   } catch (error) {
     console.error(error)
-    res.status(500).send('server error')
+    res.status(500).send(`server error`)
   }
 })
 
-router.post('/update', authMiddleware, async (req, res) => {
+router.post(`/update`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req
+    const { userId } = res.locals
 
     const { bio, facebook, youtube, twitter, instagram, profilePicUrl } = req.body
 
-    let profileFields: any = {}
+    const profileFields: any = {}
 
     profileFields.user = userId
 
@@ -183,13 +183,21 @@ router.post('/update', authMiddleware, async (req, res) => {
 
     profileFields.social = {}
 
-    if (facebook) profileFields.social.facebook = facebook
+    if (facebook) {
+      profileFields.social.facebook = facebook
+    }
 
-    if (youtube) profileFields.social.youtube = youtube
+    if (youtube) {
+      profileFields.social.youtube = youtube
+    }
 
-    if (instagram) profileFields.social.instagram = instagram
+    if (instagram) {
+      profileFields.social.instagram = instagram
+    }
 
-    if (twitter) profileFields.social.twitter = twitter
+    if (twitter) {
+      profileFields.social.twitter = twitter
+    }
 
     await ProfileModel.findOneAndUpdate({ user: userId }, { $set: profileFields }, { new: true })
 
@@ -199,42 +207,42 @@ router.post('/update', authMiddleware, async (req, res) => {
       await user.save()
     }
 
-    return res.status(200).send('Success')
+    return res.status(200).send(`Success`)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.post('/settings/password', authMiddleware, async (req, res) => {
+router.post(`/settings/password`, authMiddleware, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body
 
     if (newPassword.length < 6) {
-      return res.status(400).send('Password must be atleast 6 characters')
+      return res.status(400).send(`Password must be atleast 6 characters`)
     }
 
-    const user = await UserModel.findById(req.userId).select('+password')
+    const user = await UserModel.findById(res.locals.userId).select(`+password`)
 
     const isPassword = await compare(currentPassword, user.password)
 
     if (!isPassword) {
-      return res.status(401).send('Invalid Password')
+      return res.status(401).send(`Invalid Password`)
     }
 
     user.password = await hash(newPassword, 10)
     await user.save()
 
-    res.status(200).send('Updated successfully')
+    res.status(200).send(`Updated successfully`)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.post('/settings/messagePopup', authMiddleware, async (req, res) => {
+router.post(`/settings/messagePopup`, authMiddleware, async (req, res) => {
   try {
-    const user = await UserModel.findById(req.userId)
+    const user = await UserModel.findById(res.locals.userId)
 
     if (user.newMessagePopup) {
       user.newMessagePopup = false
@@ -243,10 +251,10 @@ router.post('/settings/messagePopup', authMiddleware, async (req, res) => {
     }
 
     await user.save()
-    return res.status(200).send('updated')
+    return res.status(200).send(`updated`)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 

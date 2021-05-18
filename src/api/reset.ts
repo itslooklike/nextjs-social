@@ -18,21 +18,21 @@ const options = {
 
 const transporter = createTransport(sendGridTransport(options))
 
-router.post('/', async (req, res) => {
+router.post(`/`, async (req, res) => {
   try {
     const { email } = req.body
 
     if (!isEmail(email)) {
-      return res.status(401).send('Invalid Email')
+      return res.status(401).send(`Invalid Email`)
     }
 
     const user = await UserModel.findOne({ email: email.toLowerCase() })
 
     if (!user) {
-      return res.status(404).send('User not found')
+      return res.status(404).send(`User not found`)
     }
 
-    const token = randomBytes(32).toString('hex')
+    const token = randomBytes(32).toString(`hex`)
 
     user.resetToken = token
     user.expireToken = Date.now() + 3600000
@@ -43,55 +43,57 @@ router.post('/', async (req, res) => {
 
     const mailOptions = {
       to: user.email,
-      from: 'singh.inder5880@gmail.com',
-      subject: 'Hi there! Password reset request',
+      from: `singh.inder5880@gmail.com`,
+      subject: `Hi there! Password reset request`,
       html: `<p>Hey ${user.name
-        .split(' ')[0]
+        .split(` `)[0]
         .toString()}, There was a request for password reset. <a href=${href}>Click this link to reset the password </a>   </p>
       <p>This token is valid for only 1 hour.</p>`,
     }
 
     transporter.sendMail(mailOptions, (err, info) => err && console.log(err))
 
-    return res.status(200).send('Email sent successfully')
+    return res.status(200).send(`Email sent successfully`)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.post('/token', async (req, res) => {
+router.post(`/token`, async (req, res) => {
   try {
     const { token, password } = req.body
 
     if (!token) {
-      return res.status(401).send('Unauthorized')
+      return res.status(401).send(`Unauthorized`)
     }
 
-    if (password.length < 6) return res.status(401).send('Password must be atleast 6 characters')
+    if (password.length < 6) {
+      return res.status(401).send(`Password must be atleast 6 characters`)
+    }
 
     const user = await UserModel.findOne({ resetToken: token })
 
     if (!user) {
-      return res.status(404).send('User not found')
+      return res.status(404).send(`User not found`)
     }
 
     if (Date.now() > user.expireToken) {
-      return res.status(401).send('Token expired.Generate new one')
+      return res.status(401).send(`Token expired.Generate new one`)
     }
 
     user.password = await hash(password, 10)
 
-    user.resetToken = ''
+    user.resetToken = ``
 
     user.expireToken = undefined
 
     await user.save()
 
-    return res.status(200).send('Password updated')
+    return res.status(200).send(`Password updated`)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 

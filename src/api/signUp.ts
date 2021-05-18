@@ -1,58 +1,65 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { sign } from 'jsonwebtoken'
 import { hash } from 'bcryptjs'
 import { isEmail } from 'validator'
 
 import { UserModel, FollowerModel, ProfileModel, NotificationModel, ChatModel } from '~/models'
+import type { IUser, IProfileData } from '~/models'
 
-const userPng = 'https://res.cloudinary.com/indersingh/image/upload/v1593464618/App/user_mklcpl.png'
+const userPng = `https://res.cloudinary.com/indersingh/image/upload/v1593464618/App/user_mklcpl.png`
 
 const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/
 
 export const routerSignUp = Router()
 
-routerSignUp.get('/:username', async (req, res) => {
+routerSignUp.get(`/:username`, async (req: Request, res: Response) => {
   const { username } = req.params
 
+  if (!username) {
+    return res.status(401).send(`Invalid`)
+  }
+
   if (username.length < 1) {
-    return res.status(401).send('Invalid')
+    return res.status(401).send(`Invalid`)
   }
 
   if (!regexUserName.test(username)) {
-    return res.status(401).send('Invalid')
+    return res.status(401).send(`Invalid`)
   }
 
   try {
     const user = await UserModel.findOne({ username: username.toLowerCase() })
 
     if (user) {
-      return res.status(401).send('Username already taken')
+      return res.status(401).send(`Username already taken`)
     }
 
-    return res.status(200).send('Available')
+    return res.status(200).send(`Available`)
   } catch (error) {
     console.error(error)
     return res.status(500).send(`Server error`)
   }
 })
 
-routerSignUp.post('/', async (req, res) => {
+routerSignUp.post(`/`, async (req: Request, res: Response) => {
   const { name, email, username, password, bio, facebook, youtube, twitter, instagram } =
     req.body.user
 
-  if (!isEmail(email)) return res.status(401).send('Invalid Email')
+  if (!isEmail(email)) {
+    return res.status(401).send(`Invalid Email`)
+  }
 
   if (password.length < 6) {
-    return res.status(401).send('Password must be atleast 6 characters')
+    return res.status(401).send(`Password must be at least 6 characters`)
   }
 
   try {
-    let user
+    let user: IUser
 
     user = await UserModel.findOne({ email: email.toLowerCase() })
 
     if (user) {
-      return res.status(401).send('User already registered')
+      return res.status(401).send(`User already registered`)
     }
 
     user = new UserModel({
@@ -67,23 +74,24 @@ routerSignUp.post('/', async (req, res) => {
 
     await user.save()
 
-    const profileFields: any = {}
-
-    profileFields.user = user._id
-
-    profileFields.bio = bio
-
-    profileFields.social = {}
+    const profileFields: IProfileData = {
+      user: user._id,
+      bio: bio,
+      social: {},
+    }
 
     if (facebook) {
       profileFields.social.facebook = facebook
     }
+
     if (youtube) {
       profileFields.social.youtube = youtube
     }
+
     if (instagram) {
       profileFields.social.instagram = instagram
     }
+
     if (twitter) {
       profileFields.social.twitter = twitter
     }
@@ -94,8 +102,11 @@ routerSignUp.post('/', async (req, res) => {
     await new ChatModel({ user: user._id, chats: [] }).save()
 
     const payload = { userId: user._id }
-    sign(payload, process.env.jwtSecret, { expiresIn: '2d' }, (err, token) => {
-      if (err) throw err
+
+    sign(payload, process.env.jwtSecret, { expiresIn: `2d` }, (err, token) => {
+      if (err) {
+        throw err
+      }
       res.status(200).json(token)
     })
   } catch (error) {

@@ -5,11 +5,11 @@ import { authMiddleware } from '~/middleware'
 
 const router = Router()
 
-router.get('/', authMiddleware, async (req, res) => {
+router.get(`/`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req
+    const { userId } = res.locals
 
-    const user = await ChatModel.findOne({ user: userId }).populate('chats.messagesWith')
+    const user = await ChatModel.findOne({ user: userId }).populate(`chats.messagesWith`)
 
     let chatsToBeSent = []
 
@@ -26,28 +26,28 @@ router.get('/', authMiddleware, async (req, res) => {
     return res.json(chatsToBeSent)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
-router.get('/user/:userToFindId', authMiddleware, async (req, res) => {
+router.get(`/user/:userToFindId`, authMiddleware, async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.userToFindId)
 
     if (!user) {
-      return res.status(404).send('No User found')
+      return res.status(404).send(`No User found`)
     }
 
     return res.json({ name: user.name, profilePicUrl: user.profilePicUrl })
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
 router.delete(`/:messagesWith`, authMiddleware, async (req, res) => {
   try {
-    const { userId } = req
+    const { userId } = res.locals
     const { messagesWith } = req.params
 
     const user = await ChatModel.findOne({ user: userId })
@@ -55,7 +55,7 @@ router.delete(`/:messagesWith`, authMiddleware, async (req, res) => {
     const chatToDelete = user.chats.find((chat) => chat.messagesWith.toString() === messagesWith)
 
     if (!chatToDelete) {
-      return res.status(404).send('Chat not found')
+      return res.status(404).send(`Chat not found`)
     }
 
     const indexOf = user.chats.map((chat) => chat.messagesWith.toString()).indexOf(messagesWith)
@@ -64,10 +64,10 @@ router.delete(`/:messagesWith`, authMiddleware, async (req, res) => {
 
     await user.save()
 
-    return res.status(200).send('Chat deleted')
+    return res.status(200).send(`Chat deleted`)
   } catch (error) {
     console.error(error)
-    return res.status(500).send('Server Error')
+    return res.status(500).send(`Server Error`)
   }
 })
 
