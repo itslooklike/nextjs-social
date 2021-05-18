@@ -5,14 +5,15 @@ module.exports = {
     node: true,
     es6: true,
   },
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
+  parser: `@typescript-eslint/parser`,
+  plugins: [`@typescript-eslint`],
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
+    `eslint:recommended`,
+    `plugin:@typescript-eslint/eslint-recommended`,
+    `plugin:@typescript-eslint/recommended`,
   ],
   rules: {
-    curly: 'all',
+    curly: [`error`, `all`],
+    quotes: [`error`, `backtick`],
   },
 }

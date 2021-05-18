@@ -1,5 +1,4 @@
-import { UserModel } from '../models/UserModel'
-import { findOne } from '../models/NotificationModel'
+import { UserModel, NotificationModel } from '~/models'
 
 export const setNotificationToUnread = async (userId) => {
   try {
@@ -18,7 +17,7 @@ export const setNotificationToUnread = async (userId) => {
 
 export const newLikeNotification = async (userId, postId, userToNotifyId) => {
   try {
-    const userToNotify = await findOne({ user: userToNotifyId })
+    const userToNotify = await NotificationModel.findOne({ user: userToNotifyId })
 
     const newNotification = {
       type: 'newLike',
@@ -39,7 +38,7 @@ export const newLikeNotification = async (userId, postId, userToNotifyId) => {
 
 export const removeLikeNotification = async (userId, postId, userToNotifyId) => {
   try {
-    const user = await findOne({ user: userToNotifyId })
+    const user = await NotificationModel.findOne({ user: userToNotifyId })
 
     const notificationToRemove = await user.notifications.find(
       (notification) =>
@@ -63,7 +62,7 @@ export const removeLikeNotification = async (userId, postId, userToNotifyId) => 
 
 export const newCommentNotification = async (postId, commentId, userId, userToNotifyId, text) => {
   try {
-    const userToNotify = await findOne({ user: userToNotifyId })
+    const userToNotify = await NotificationModel.findOne({ user: userToNotifyId })
 
     const newNotification = {
       type: 'newComment',
@@ -87,7 +86,7 @@ export const newCommentNotification = async (postId, commentId, userId, userToNo
 
 export const removeCommentNotification = async (postId, commentId, userId, userToNotifyId) => {
   try {
-    const user = await findOne({ user: userToNotifyId })
+    const user = await NotificationModel.findOne({ user: userToNotifyId })
 
     const notificationToRemove = await user.notifications.find(
       (notification) =>
@@ -110,7 +109,7 @@ export const removeCommentNotification = async (postId, commentId, userId, userT
 
 export const newFollowerNotification = async (userId, userToNotifyId) => {
   try {
-    const user = await findOne({ user: userToNotifyId })
+    const user = await NotificationModel.findOne({ user: userToNotifyId })
 
     const newNotification = {
       type: 'newFollower',
@@ -131,7 +130,7 @@ export const newFollowerNotification = async (userId, userToNotifyId) => {
 
 export const removeFollowerNotification = async (userId, userToNotifyId) => {
   try {
-    const user = await findOne({ user: userToNotifyId })
+    const user = await NotificationModel.findOne({ user: userToNotifyId })
 
     const notificationToRemove = await user.notifications.find(
       (notification) =>

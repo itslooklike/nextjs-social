@@ -1,6 +1,5 @@
-import { UserModel } from '../models/UserModel'
-import PostModel from '../models/PostModel'
-import { newLikeNotification, removeLikeNotification } from '../utilsServer/notificationActions'
+import { UserModel, PostModel } from '~/models'
+import { newLikeNotification, removeLikeNotification } from '~/utilsServer/notificationActions'
 
 export const likeOrUnlikePost = async (postId, userId, like) => {
   try {

@@ -1,5 +1,4 @@
-import ChatModel from '../models/ChatModel'
-import { UserModel } from '../models/UserModel'
+import { UserModel, ChatModel } from '~/models'
 
 export const loadMessages = async (userId, messagesWith) => {
   try {

@@ -18,7 +18,7 @@ router.post('/', authMiddleware, async (req, res) => {
   if (text.length < 1) return res.status(401).send('Text must be atleast 1 character')
 
   try {
-    const newPost = {
+    const newPost: any = {
       user: req.userId,
       text,
     }
@@ -52,7 +52,7 @@ router.get('/', authMiddleware, async (req, res) => {
     let posts
 
     if (number === 1) {
-      posts = await find()
+      posts = await PostModel.find()
         .limit(size)
         .sort({ createdAt: -1 })
         .populate('user')
@@ -61,7 +61,7 @@ router.get('/', authMiddleware, async (req, res) => {
     //
     else {
       const skips = size * (number - 1)
-      posts = await find()
+      posts = await PostModel.find()
         .skip(skips)
         .limit(size)
         .sort({ createdAt: -1 })
@@ -95,7 +95,11 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 
     postsToBeSent.length > 0 &&
-      postsToBeSent.sort((a, b) => [new Date(b.createdAt) - new Date(a.createdAt)])
+      // @ts-ignore
+      postsToBeSent.sort((a, b) => {
+        // @ts-ignore
+        return [new Date(b.createdAt) - new Date(a.createdAt)]
+      })
 
     return res.json(postsToBeSent)
   } catch (error) {

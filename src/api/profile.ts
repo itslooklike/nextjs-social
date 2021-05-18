@@ -175,7 +175,8 @@ router.post('/update', authMiddleware, async (req, res) => {
 
     const { bio, facebook, youtube, twitter, instagram, profilePicUrl } = req.body
 
-    let profileFields = {}
+    let profileFields: any = {}
+
     profileFields.user = userId
 
     profileFields.bio = bio
