@@ -7,7 +7,7 @@ import catchErrors from './catchErrors'
 
 const Axios = axios.create({
   baseURL: `${baseUrl}/api/profile`,
-  headers: { Authorization: cookie.get('token') },
+  headers: { Authorization: cookie.get(`token`) },
 })
 
 export const followUser = async (userToFollowId, setUserFollowStats) => {

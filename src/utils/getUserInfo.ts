@@ -6,7 +6,7 @@ import baseUrl from './baseUrl'
 const getUserInfo = async (userToFindId) => {
   try {
     const res = await axios.get(`${baseUrl}/api/chats/user/${userToFindId}`, {
-      headers: { Authorization: cookie.get('token') },
+      headers: { Authorization: cookie.get(`token`) },
     })
 
     return { name: res.data.name, profilePicUrl: res.data.profilePicUrl }
