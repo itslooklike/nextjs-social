@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import axios from 'axios'
 import { parseCookies } from 'nookies'
 import { Card, Icon, Image, Divider, Segment, Container } from 'semantic-ui-react'
@@ -30,12 +30,11 @@ function PostPage({ post, errorLoading, user }) {
           {post.picUrl && (
             <Image
               src={post.picUrl}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: `pointer` }}
               floated="left"
               wrapped
               ui={false}
               alt="PostImage"
-              onClick={() => setShowModal(true)}
             />
           )}
 
@@ -53,9 +52,9 @@ function PostPage({ post, errorLoading, user }) {
 
             <Card.Description
               style={{
-                fontSize: '17px',
-                letterSpacing: '0.1px',
-                wordSpacing: '0.35px',
+                fontSize: `17px`,
+                letterSpacing: `0.1px`,
+                wordSpacing: `0.35px`,
               }}
             >
               {post.text}
@@ -64,10 +63,10 @@ function PostPage({ post, errorLoading, user }) {
 
           <Card.Content extra>
             <Icon
-              name={isLiked ? 'heart' : 'heart outline'}
+              name={isLiked ? `heart` : `heart outline`}
               color="red"
-              style={{ cursor: 'pointer' }}
-              onClick={() => likePost(post._id, user._id, setLikes, isLiked ? false : true)}
+              style={{ cursor: `pointer` }}
+              onClick={() => likePost(post._id, user._id, setLikes, !isLiked)}
             />
 
             <LikesList
@@ -75,13 +74,13 @@ function PostPage({ post, errorLoading, user }) {
               trigger={
                 likes.length > 0 && (
                   <span className="spanLikesList">
-                    {`${likes.length} ${likes.length === 1 ? 'like' : 'likes'}`}
+                    {`${likes.length} ${likes.length === 1 ? `like` : `likes`}`}
                   </span>
                 )
               }
             />
 
-            <Icon name="comment outline" style={{ marginLeft: '7px' }} color="blue" />
+            <Icon name="comment outline" style={{ marginLeft: `7px` }} color="blue" />
 
             {comments.length > 0 &&
               comments.map((comment) => (

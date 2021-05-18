@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Form, Button, Message, Segment, Divider } from 'semantic-ui-react'
 import cookie from 'js-cookie'
 import { loginUser } from '../utils/authUser'
@@ -6,8 +6,8 @@ import { HeaderMessage, FooterMessage } from '../components/Common/WelcomeMessag
 
 function Login() {
   const [user, setUser] = useState({
-    email: '',
-    password: '',
+    email: ``,
+    password: ``,
   })
 
   const { email, password } = user
@@ -24,7 +24,12 @@ function Login() {
 
   useEffect(() => {
     const isUser = Object.values({ email, password }).every((item) => Boolean(item))
-    isUser ? setSubmitDisabled(false) : setSubmitDisabled(true)
+
+    if (isUser) {
+      setSubmitDisabled(false)
+    } else {
+      setSubmitDisabled(true)
+    }
   }, [user])
 
   const handleSubmit = async (e) => {
@@ -34,9 +39,11 @@ function Login() {
   }
 
   useEffect(() => {
-    document.title = 'Welcome Back'
-    const userEmail = cookie.get('userEmail')
-    if (userEmail) setUser((prev) => ({ ...prev, email: userEmail }))
+    document.title = `Welcome Back`
+    const userEmail = cookie.get(`userEmail`)
+    if (userEmail) {
+      setUser((prev) => ({ ...prev, email: userEmail }))
+    }
   }, [])
 
   return (
@@ -67,13 +74,13 @@ function Login() {
             onChange={handleChange}
             fluid
             icon={{
-              name: 'eye',
+              name: `eye`,
               circular: true,
               link: true,
               onClick: () => setShowPassword(!showPassword),
             }}
             iconPosition="left"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? `text` : `password`}
             required
           />
 

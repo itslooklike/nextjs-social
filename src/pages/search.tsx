@@ -1,5 +1,3 @@
-import React from 'react'
-
 import Search from '../components/Layout/Search'
 
 function SearchPage() {

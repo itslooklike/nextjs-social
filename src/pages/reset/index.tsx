@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Form, Button, Message, Segment } from 'semantic-ui-react'
 import axios from 'axios'
 
@@ -6,7 +6,7 @@ import baseUrl from '../../utils/baseUrl'
 import catchErrors from '../../utils/catchErrors'
 
 function ResetPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(``)
   const [errorMsg, setErrorMsg] = useState(null)
 
   const [emailChecked, setEmailChecked] = useState(false)
@@ -30,7 +30,9 @@ function ResetPage() {
   }
 
   useEffect(() => {
-    errorMsg !== null && setTimeout(() => setErrorMsg(null), 5000)
+    if (errorMsg !== null) {
+      setTimeout(() => setErrorMsg(null), 5000)
+    }
   }, [errorMsg])
 
   return (

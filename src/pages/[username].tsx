@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import io from 'socket.io-client'
 import { useRouter } from 'next/router'
 import axios from 'axios'
@@ -32,14 +32,16 @@ function ProfilePage({
   const [loading, setLoading] = useState(false)
   const [showToastr, setShowToastr] = useState(false)
 
-  const [activeItem, setActiveItem] = useState('profile')
+  const [activeItem, setActiveItem] = useState(`profile`)
   const handleItemClick = (clickedTab) => setActiveItem(clickedTab)
 
   const [loggedUserFollowStats, setUserFollowStats] = useState(userFollowStats)
 
   const ownAccount = profile.user._id === user._id
 
-  if (errorLoading) return <NoProfile />
+  if (errorLoading) {
+    return <NoProfile />
+  }
 
   useEffect(() => {
     const getPosts = async () => {
@@ -48,12 +50,12 @@ function ProfilePage({
       try {
         const { username } = router.query
         const res = await axios.get(`${baseUrl}/api/profile/posts/${username}`, {
-          headers: { Authorization: cookie.get('token') },
+          headers: { Authorization: cookie.get(`token`) },
         })
 
         setPosts(res.data)
       } catch (error) {
-        alert('Error Loading Posts')
+        alert(`Error Loading Posts`)
       }
 
       setLoading(false)
@@ -62,7 +64,9 @@ function ProfilePage({
   }, [router.query.username])
 
   useEffect(() => {
-    showToastr && setTimeout(() => setShowToastr(false), 4000)
+    if (showToastr) {
+      setTimeout(() => setShowToastr(false), 4000)
+    }
   }, [showToastr])
 
   const socket = useRef()
@@ -73,12 +77,12 @@ function ProfilePage({
     }
 
     if (socket.current) {
-      socket.current.emit('join', { userId: user._id })
+      socket.current.emit(`join`, { userId: user._id })
     }
 
     return () => {
       if (socket.current) {
-        socket.current.emit('disconnect')
+        socket.current.emit(`disconnect`)
         socket.current.off()
       }
     }
@@ -104,7 +108,7 @@ function ProfilePage({
 
         <Grid.Row>
           <Grid.Column>
-            {activeItem === 'profile' && (
+            {activeItem === `profile` && (
               <>
                 <ProfileHeader
                   profile={profile}
@@ -132,7 +136,7 @@ function ProfilePage({
               </>
             )}
 
-            {activeItem === 'followers' && (
+            {activeItem === `followers` && (
               <Followers
                 user={user}
                 loggedUserFollowStats={loggedUserFollowStats}
@@ -141,7 +145,7 @@ function ProfilePage({
               />
             )}
 
-            {activeItem === 'following' && (
+            {activeItem === `following` && (
               <Following
                 user={user}
                 loggedUserFollowStats={loggedUserFollowStats}
@@ -150,9 +154,9 @@ function ProfilePage({
               />
             )}
 
-            {activeItem === 'updateProfile' && <UpdateProfile Profile={profile} />}
+            {activeItem === `updateProfile` && <UpdateProfile Profile={profile} />}
 
-            {activeItem === 'settings' && <Settings newMessagePopup={user.newMessagePopup} />}
+            {activeItem === `settings` && <Settings newMessagePopup={user.newMessagePopup} />}
           </Grid.Column>
         </Grid.Row>
       </Grid>

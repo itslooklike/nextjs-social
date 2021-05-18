@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Form, Button, Message, Segment, Divider } from 'semantic-ui-react'
 import axios from 'axios'
 
@@ -15,14 +15,14 @@ let cancel
 
 function Signup() {
   const [user, setUser] = useState({
-    name: '',
-    email: '',
-    password: '',
-    bio: '',
-    facebook: '',
-    youtube: '',
-    twitter: '',
-    instagram: '',
+    name: ``,
+    email: ``,
+    password: ``,
+    bio: ``,
+    facebook: ``,
+    youtube: ``,
+    twitter: ``,
+    instagram: ``,
   })
 
   const { name, email, password, bio } = user
@@ -30,7 +30,7 @@ function Signup() {
   const handleChange = (e) => {
     const { name, value, files } = e.target
 
-    if (name === 'media') {
+    if (name === `media`) {
       setMedia(files[0])
       setMediaPreview(URL.createObjectURL(files[0]))
     }
@@ -44,7 +44,7 @@ function Signup() {
   const [formLoading, setFormLoading] = useState(false)
   const [submitDisabled, setSubmitDisabled] = useState(true)
 
-  const [username, setUsername] = useState('')
+  const [username, setUsername] = useState(``)
   const [usernameLoading, setUsernameLoading] = useState(false)
   const [usernameAvailable, setUsernameAvailable] = useState(false)
 
@@ -55,15 +55,22 @@ function Signup() {
 
   useEffect(() => {
     const isUser = Object.values({ name, email, password, bio }).every((item) => Boolean(item))
-    isUser ? setSubmitDisabled(false) : setSubmitDisabled(true)
+
+    if (isUser) {
+      setSubmitDisabled(false)
+    } else {
+      setSubmitDisabled(true)
+    }
   }, [user])
 
   const checkUsername = async () => {
     setUsernameLoading(true)
     try {
-      cancel && cancel()
+      if (cancel) {
+        cancel()
+      }
 
-      const CancelToken = axios.CancelToken
+      const { CancelToken } = axios
 
       const res = await axios.get(`${baseUrl}/api/signup/${username}`, {
         cancelToken: new CancelToken((canceler) => {
@@ -71,21 +78,27 @@ function Signup() {
         }),
       })
 
-      if (errorMsg !== null) setErrorMsg(null)
+      if (errorMsg !== null) {
+        setErrorMsg(null)
+      }
 
-      if (res.data === 'Available') {
+      if (res.data === `Available`) {
         setUsernameAvailable(true)
         setUser((prev) => ({ ...prev, username }))
       }
     } catch (error) {
-      setErrorMsg('Username Not Available')
+      setErrorMsg(`Username Not Available`)
       setUsernameAvailable(false)
     }
     setUsernameLoading(false)
   }
 
   useEffect(() => {
-    username === '' ? setUsernameAvailable(false) : checkUsername()
+    if (username === ``) {
+      setUsernameAvailable(false)
+    } else {
+      checkUsername()
+    }
   }, [username])
 
   const handleSubmit = async (e) => {
@@ -99,7 +112,7 @@ function Signup() {
 
     if (media !== null && !profilePicUrl) {
       setFormLoading(false)
-      return setErrorMsg('Error Uploading Image')
+      return setErrorMsg(`Error Uploading Image`)
     }
 
     await registerUser(user, profilePicUrl, setErrorMsg, setFormLoading)
@@ -154,13 +167,13 @@ function Signup() {
             onChange={handleChange}
             fluid
             icon={{
-              name: 'eye',
+              name: `eye`,
               circular: true,
               link: true,
               onClick: () => setShowPassword(!showPassword),
             }}
             iconPosition="left"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? `text` : `password`}
             required
           />
 
@@ -180,7 +193,7 @@ function Signup() {
               }
             }}
             fluid
-            icon={usernameAvailable ? 'check' : 'close'}
+            icon={usernameAvailable ? `check` : `close`}
             iconPosition="left"
           />
 

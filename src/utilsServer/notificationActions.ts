@@ -26,7 +26,9 @@ export const newLikeNotification = async (userId, postId, userToNotifyId) => {
       date: Date.now(),
     }
 
+    // @ts-ignore
     await userToNotify.notifications.unshift(newNotification)
+
     await userToNotify.save()
 
     await setNotificationToUnread(userToNotifyId)
@@ -48,10 +50,13 @@ export const removeLikeNotification = async (userId, postId, userToNotifyId) => 
     )
 
     const indexOf = user.notifications
+      // @ts-ignore
       .map((notification) => notification._id.toString())
+      // @ts-ignore
       .indexOf(notificationToRemove._id.toString())
 
     await user.notifications.splice(indexOf, 1)
+
     await user.save()
 
     return
@@ -73,6 +78,7 @@ export const newCommentNotification = async (postId, commentId, userId, userToNo
       date: Date.now(),
     }
 
+    // @ts-ignore
     await userToNotify.notifications.unshift(newNotification)
 
     await userToNotify.save()
@@ -97,7 +103,9 @@ export const removeCommentNotification = async (postId, commentId, userId, userT
     )
 
     const indexOf = await user.notifications
+      // @ts-ignore
       .map((notification) => notification._id.toString())
+      // @ts-ignore
       .indexOf(notificationToRemove._id.toString())
 
     await user.notifications.splice(indexOf, 1)
@@ -117,6 +125,7 @@ export const newFollowerNotification = async (userId, userToNotifyId) => {
       date: Date.now(),
     }
 
+    // @ts-ignore
     await user.notifications.unshift(newNotification)
 
     await user.save()
@@ -138,7 +147,9 @@ export const removeFollowerNotification = async (userId, userToNotifyId) => {
     )
 
     const indexOf = await user.notifications
+      // @ts-ignore
       .map((notification) => notification._id.toString())
+      // @ts-ignore
       .indexOf(notificationToRemove._id.toString())
 
     await user.notifications.splice(indexOf, 1)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Form, Button, Message, Segment, Divider } from 'semantic-ui-react'
 import axios from 'axios'
@@ -9,7 +9,7 @@ import catchErrors from '../../utils/catchErrors'
 function TokenPage() {
   const router = useRouter()
 
-  const [newPassword, setNewPassword] = useState({ field1: '', field2: '' })
+  const [newPassword, setNewPassword] = useState({ field1: ``, field2: `` })
 
   const { field1, field2 } = newPassword
 
@@ -24,7 +24,9 @@ function TokenPage() {
   }
 
   useEffect(() => {
-    errorMsg !== null && setTimeout(() => setErrorMsg(null), 5000)
+    if (errorMsg !== null) {
+      setTimeout(() => setErrorMsg(null), 5000)
+    }
   }, [errorMsg])
 
   const resetPassword = async (e) => {
@@ -33,7 +35,7 @@ function TokenPage() {
     setLoading(true)
     try {
       if (field1 !== field2) {
-        return setErrorMsg('Passwords do not match')
+        return setErrorMsg(`Passwords do not match`)
       }
 
       await axios.post(`${baseUrl}/api/reset/token`, {
@@ -59,8 +61,8 @@ function TokenPage() {
           header="Password reset successfull"
           icon="check"
           content="Login Again"
-          style={{ cursor: 'pointer' }}
-          onClick={() => router.push('/login')}
+          style={{ cursor: `pointer` }}
+          onClick={() => router.push(`/login`)}
         />
       ) : (
         <Message attached icon="settings" header="Reset Password" color="teal" />
@@ -99,7 +101,7 @@ function TokenPage() {
             <Divider hidden />
 
             <Button
-              disabled={field1 === '' || field2 === '' || loading}
+              disabled={field1 === `` || field2 === `` || loading}
               icon="configure"
               type="submit"
               color="orange"
