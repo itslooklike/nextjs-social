@@ -20,7 +20,7 @@ export const newLikeNotification = async (userId, postId, userToNotifyId) => {
     const userToNotify = await NotificationModel.findOne({ user: userToNotifyId })
 
     const newNotification = {
-      type: 'newLike',
+      type: `newLike`,
       user: userId,
       post: postId,
       date: Date.now(),
@@ -42,7 +42,7 @@ export const removeLikeNotification = async (userId, postId, userToNotifyId) => 
 
     const notificationToRemove = await user.notifications.find(
       (notification) =>
-        notification.type === 'newLike' &&
+        notification.type === `newLike` &&
         notification.user.toString() === userId &&
         notification.post.toString() === postId
     )
@@ -65,7 +65,7 @@ export const newCommentNotification = async (postId, commentId, userId, userToNo
     const userToNotify = await NotificationModel.findOne({ user: userToNotifyId })
 
     const newNotification = {
-      type: 'newComment',
+      type: `newComment`,
       user: userId,
       post: postId,
       commentId,
@@ -90,7 +90,7 @@ export const removeCommentNotification = async (postId, commentId, userId, userT
 
     const notificationToRemove = await user.notifications.find(
       (notification) =>
-        notification.type === 'newComment' &&
+        notification.type === `newComment` &&
         notification.user.toString() === userId &&
         notification.post.toString() === postId &&
         notification.commentId === commentId
@@ -112,7 +112,7 @@ export const newFollowerNotification = async (userId, userToNotifyId) => {
     const user = await NotificationModel.findOne({ user: userToNotifyId })
 
     const newNotification = {
-      type: 'newFollower',
+      type: `newFollower`,
       user: userId,
       date: Date.now(),
     }
@@ -134,7 +134,7 @@ export const removeFollowerNotification = async (userId, userToNotifyId) => {
 
     const notificationToRemove = await user.notifications.find(
       (notification) =>
-        notification.type === 'newFollower' && notification.user.toString() === userId
+        notification.type === `newFollower` && notification.user.toString() === userId
     )
 
     const indexOf = await user.notifications

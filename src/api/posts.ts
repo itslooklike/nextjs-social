@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { v4 as uuid } from 'uuid'
 
 import { authMiddleware } from '~/middleware'
-import { UserModel, FollowerModel, PostModel } from '~/models'
+import { UserModel, FollowerModel, PostModel, IPostData } from '~/models'
 import {
   newLikeNotification,
   removeLikeNotification,
@@ -10,9 +10,9 @@ import {
   removeCommentNotification,
 } from '../utilsServer/notificationActions'
 
-const router = Router()
+export const routerPosts = Router()
 
-router.post(`/`, authMiddleware, async (req, res) => {
+routerPosts.post(`/`, authMiddleware, async (req, res) => {
   const { text, location, picUrl } = req.body
 
   if (text.length < 1) {
@@ -20,7 +20,7 @@ router.post(`/`, authMiddleware, async (req, res) => {
   }
 
   try {
-    const newPost: any = {
+    const newPost: IPostData = {
       user: res.locals.userId,
       text,
     }
@@ -44,7 +44,7 @@ router.post(`/`, authMiddleware, async (req, res) => {
   }
 })
 
-router.get(`/`, authMiddleware, async (req, res) => {
+routerPosts.get(`/`, authMiddleware, async (req, res) => {
   const { pageNumber } = req.query
 
   const number = Number(pageNumber)
@@ -59,10 +59,9 @@ router.get(`/`, authMiddleware, async (req, res) => {
         .sort({ createdAt: -1 })
         .populate(`user`)
         .populate(`comments.user`)
-    }
-    //
-    else {
+    } else {
       const skips = size * (number - 1)
+
       posts = await PostModel.find()
         .skip(skips)
         .limit(size)
@@ -103,10 +102,10 @@ router.get(`/`, authMiddleware, async (req, res) => {
 
     postsToBeSent.length > 0 &&
       // @ts-ignore
-      postsToBeSent.sort((a, b) => {
+      postsToBeSent.sort((a, b) =>
         // @ts-ignore
-        return [new Date(b.createdAt) - new Date(a.createdAt)]
-      })
+        [new Date(b.createdAt) - new Date(a.createdAt)]
+      )
 
     return res.json(postsToBeSent)
   } catch (error) {
@@ -115,7 +114,7 @@ router.get(`/`, authMiddleware, async (req, res) => {
   }
 })
 
-router.get(`/:postId`, authMiddleware, async (req, res) => {
+routerPosts.get(`/:postId`, authMiddleware, async (req, res) => {
   try {
     const post = await PostModel.findById(req.params.postId)
       .populate(`user`)
@@ -132,13 +131,13 @@ router.get(`/:postId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.delete(`/:postId`, authMiddleware, async (req, res) => {
+routerPosts.delete(`/:postId`, authMiddleware, async (req, res) => {
   try {
     const { userId } = res.locals
-
     const { postId } = req.params
 
     const post = await PostModel.findById(postId)
+
     if (!post) {
       return res.status(404).send(`post not found`)
     }
@@ -149,9 +148,8 @@ router.delete(`/:postId`, authMiddleware, async (req, res) => {
       if (user.role === `root`) {
         await post.remove()
         return res.status(200).send(`Post deleted Successfully`)
-      } else {
-        return res.status(401).send(`Unauthorized`)
       }
+      return res.status(401).send(`Unauthorized`)
     }
 
     await post.remove()
@@ -162,12 +160,13 @@ router.delete(`/:postId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.post(`/like/:postId`, authMiddleware, async (req, res) => {
+routerPosts.post(`/like/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
     const { userId } = res.locals
 
     const post = await PostModel.findById(postId)
+
     if (!post) {
       return res.status(404).send(`No Post found`)
     }
@@ -179,6 +178,7 @@ router.post(`/like/:postId`, authMiddleware, async (req, res) => {
     }
 
     await post.likes.unshift({ user: userId })
+
     await post.save()
 
     if (post.user.toString() !== userId) {
@@ -192,12 +192,13 @@ router.post(`/like/:postId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.put(`/unlike/:postId`, authMiddleware, async (req, res) => {
+routerPosts.put(`/unlike/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
     const { userId } = res.locals
 
     const post = await PostModel.findById(postId)
+
     if (!post) {
       return res.status(404).send(`No Post found`)
     }
@@ -225,7 +226,7 @@ router.put(`/unlike/:postId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.get(`/like/:postId`, authMiddleware, async (req, res) => {
+routerPosts.get(`/like/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
 
@@ -241,10 +242,9 @@ router.get(`/like/:postId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.post(`/comment/:postId`, authMiddleware, async (req, res) => {
+routerPosts.post(`/comment/:postId`, authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
-
     const { userId } = res.locals
     const { text } = req.body
 
@@ -279,17 +279,19 @@ router.post(`/comment/:postId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.delete(`/:postId/:commentId`, authMiddleware, async (req, res) => {
+routerPosts.delete(`/:postId/:commentId`, authMiddleware, async (req, res) => {
   try {
     const { postId, commentId } = req.params
     const { userId } = res.locals
 
     const post = await PostModel.findById(postId)
+
     if (!post) {
       return res.status(404).send(`Post not found`)
     }
 
-    const comment = post.comments.find((comment) => comment._id === commentId)
+    const comment = post.comments.find((item) => item._id === commentId)
+
     if (!comment) {
       return res.status(404).send(`No Comment found`)
     }
@@ -297,7 +299,7 @@ router.delete(`/:postId/:commentId`, authMiddleware, async (req, res) => {
     const user = await UserModel.findById(userId)
 
     const deleteComment = async () => {
-      const indexOf = post.comments.map((comment) => comment._id).indexOf(commentId)
+      const indexOf = post.comments.map((item) => item._id).indexOf(commentId)
 
       await post.comments.splice(indexOf, 1)
 
@@ -324,5 +326,3 @@ router.delete(`/:postId/:commentId`, authMiddleware, async (req, res) => {
     return res.status(500).send(`Server error`)
   }
 })
-
-export default router

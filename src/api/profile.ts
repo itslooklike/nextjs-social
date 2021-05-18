@@ -255,7 +255,9 @@ routerProfile.post(`/settings/password`, authMiddleware, async (req: Request, re
 
 routerProfile.post(`/settings/messagePopup`, authMiddleware, async (_, res: Response) => {
   try {
-    const user = await UserModel.findById(res.locals.userId)
+    const { userId } = res.locals
+
+    const user = await UserModel.findById(userId)
 
     if (user.newMessagePopup) {
       user.newMessagePopup = false

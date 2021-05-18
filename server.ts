@@ -4,8 +4,8 @@ import next from 'next'
 import { createServer } from 'http'
 import socketIo from 'socket.io'
 
-import { routerAuth, routerSignUp, routerSearch, routerProfile } from '~/api'
-import routerPosts from '~/api/posts'
+import { routerAuth, routerSignUp, routerSearch, routerProfile, routerPosts } from '~/api'
+
 import routerNotifications from '~/api/notifications'
 import routerChats from '~/api/chats'
 import routerReset from '~/api/reset'
