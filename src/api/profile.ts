@@ -1,20 +1,23 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { compare, hash } from 'bcryptjs'
 
 import { authMiddleware } from '~/middleware'
 import { UserModel, PostModel, FollowerModel, ProfileModel } from '~/models'
+import type { IProfileData } from '~/models'
+
 import {
   newFollowerNotification,
   removeFollowerNotification,
 } from '../utilsServer/notificationActions'
 
-const router = Router()
+export const routerProfile = Router()
 
-router.get(`/:username`, authMiddleware, async (req, res) => {
+routerProfile.get(`/:username`, authMiddleware, async (req: Request, res: Response) => {
   try {
     const { username } = req.params
 
     const user = await UserModel.findOne({ username: username.toLowerCase() })
+
     if (!user) {
       return res.status(404).send(`No User Found`)
     }
@@ -23,26 +26,31 @@ router.get(`/:username`, authMiddleware, async (req, res) => {
 
     const profileFollowStats = await FollowerModel.findOne({ user: user._id })
 
-    return res.json({
+    const followersLength =
+      profileFollowStats.followers.length > 0 ? profileFollowStats.followers.length : 0
+
+    const followingLength =
+      profileFollowStats.following.length > 0 ? profileFollowStats.following.length : 0
+
+    const data = {
       profile,
+      followersLength,
+      followingLength,
+    }
 
-      followersLength:
-        profileFollowStats.followers.length > 0 ? profileFollowStats.followers.length : 0,
-
-      followingLength:
-        profileFollowStats.following.length > 0 ? profileFollowStats.following.length : 0,
-    })
+    return res.json(data)
   } catch (error) {
     console.error(error)
     return res.status(500).send(`Server Error`)
   }
 })
 
-router.get(`/posts/:username`, authMiddleware, async (req, res) => {
+routerProfile.get(`/posts/:username`, authMiddleware, async (req: Request, res: Response) => {
   try {
     const { username } = req.params
 
     const user = await UserModel.findOne({ username: username.toLowerCase() })
+
     if (!user) {
       return res.status(404).send(`No User Found`)
     }
@@ -59,7 +67,7 @@ router.get(`/posts/:username`, authMiddleware, async (req, res) => {
   }
 })
 
-router.get(`/followers/:userId`, authMiddleware, async (req, res) => {
+routerProfile.get(`/followers/:userId`, authMiddleware, async (_, res: Response) => {
   try {
     const { userId } = res.locals.params
 
@@ -72,7 +80,7 @@ router.get(`/followers/:userId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.get(`/following/:userId`, authMiddleware, async (req, res) => {
+routerProfile.get(`/following/:userId`, authMiddleware, async (_, res: Response) => {
   try {
     const { userId } = res.locals.params
 
@@ -85,103 +93,107 @@ router.get(`/following/:userId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.post(`/follow/:userToFollowId`, authMiddleware, async (req, res) => {
-  try {
-    const { userId } = res.locals
-    const { userToFollowId } = req.params
+routerProfile.post(
+  `/follow/:userToFollowId`,
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    try {
+      const { userId } = res.locals
+      const { userToFollowId } = req.params
 
-    const user = await FollowerModel.findOne({ user: userId })
-    const userToFollow = await FollowerModel.findOne({ user: userToFollowId })
+      const user = await FollowerModel.findOne({ user: userId })
+      const userToFollow = await FollowerModel.findOne({ user: userToFollowId })
 
-    if (!user || !userToFollow) {
-      return res.status(404).send(`User not found`)
+      if (!user || !userToFollow) {
+        return res.status(404).send(`User not found`)
+      }
+
+      const isFollowing =
+        user.following.length > 0 &&
+        user.following.filter((following) => following.user.toString() === userToFollowId).length >
+          0
+
+      if (isFollowing) {
+        return res.status(401).send(`User Already Followed`)
+      }
+
+      await user.following.unshift({ user: userToFollowId })
+      await user.save()
+
+      await userToFollow.followers.unshift({ user: userId })
+      await userToFollow.save()
+
+      await newFollowerNotification(userId, userToFollowId)
+
+      return res.status(200).send(`Updated`)
+    } catch (error) {
+      console.error(error)
+      return res.status(500).send(`Server Error`)
     }
-
-    const isFollowing =
-      user.following.length > 0 &&
-      user.following.filter((following) => following.user.toString() === userToFollowId).length > 0
-
-    if (isFollowing) {
-      return res.status(401).send(`User Already Followed`)
-    }
-
-    await user.following.unshift({ user: userToFollowId })
-    await user.save()
-
-    await userToFollow.followers.unshift({ user: userId })
-    await userToFollow.save()
-
-    await newFollowerNotification(userId, userToFollowId)
-
-    return res.status(200).send(`Updated`)
-  } catch (error) {
-    console.error(error)
-    return res.status(500).send(`Server Error`)
   }
-})
+)
 
-router.put(`/unfollow/:userToUnfollowId`, authMiddleware, async (req, res) => {
-  try {
-    const { userId } = res.locals
-    const { userToUnfollowId } = req.params
+routerProfile.put(
+  `/unfollow/:userToUnfollowId`,
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    try {
+      const { userId } = res.locals
+      const { userToUnfollowId } = req.params
 
-    const user = await FollowerModel.findOne({
-      user: userId,
-    })
+      const user = await FollowerModel.findOne({ user: userId })
 
-    const userToUnfollow = await FollowerModel.findOne({
-      user: userToUnfollowId,
-    })
+      const userToUnfollow = await FollowerModel.findOne({ user: userToUnfollowId })
 
-    if (!user || !userToUnfollow) {
-      return res.status(404).send(`User not found`)
+      if (!user || !userToUnfollow) {
+        return res.status(404).send(`User not found`)
+      }
+
+      const isFollowing =
+        user.following.length > 0 &&
+        user.following.filter((following) => following.user.toString() === userToUnfollowId)
+          .length === 0
+
+      if (isFollowing) {
+        return res.status(401).send(`User Not Followed before`)
+      }
+
+      const removeFollowing = await user.following
+        .map((following) => following.user.toString())
+        .indexOf(userToUnfollowId)
+
+      await user.following.splice(removeFollowing, 1)
+
+      await user.save()
+
+      const removeFollower = await userToUnfollow.followers
+        .map((follower) => follower.user.toString())
+        .indexOf(userId)
+
+      await userToUnfollow.followers.splice(removeFollower, 1)
+      await userToUnfollow.save()
+
+      await removeFollowerNotification(userId, userToUnfollowId)
+
+      return res.status(200).send(`Updated`)
+    } catch (error) {
+      console.error(error)
+      res.status(500).send(`server error`)
     }
-
-    const isFollowing =
-      user.following.length > 0 &&
-      user.following.filter((following) => following.user.toString() === userToUnfollowId)
-        .length === 0
-
-    if (isFollowing) {
-      return res.status(401).send(`User Not Followed before`)
-    }
-
-    const removeFollowing = await user.following
-      .map((following) => following.user.toString())
-      .indexOf(userToUnfollowId)
-
-    await user.following.splice(removeFollowing, 1)
-    await user.save()
-
-    const removeFollower = await userToUnfollow.followers
-      .map((follower) => follower.user.toString())
-      .indexOf(userId)
-
-    await userToUnfollow.followers.splice(removeFollower, 1)
-    await userToUnfollow.save()
-
-    await removeFollowerNotification(userId, userToUnfollowId)
-
-    return res.status(200).send(`Updated`)
-  } catch (error) {
-    console.error(error)
-    res.status(500).send(`server error`)
   }
-})
+)
 
-router.post(`/update`, authMiddleware, async (req, res) => {
+routerProfile.post(`/update`, authMiddleware, async (req: Request, res: Response) => {
   try {
     const { userId } = res.locals
 
     const { bio, facebook, youtube, twitter, instagram, profilePicUrl } = req.body
 
-    const profileFields: any = {}
-
-    profileFields.user = userId
-
-    profileFields.bio = bio
-
-    profileFields.social = {}
+    const profileFields: IProfileData = {
+      user: userId,
+      bio,
+      social: {},
+    }
 
     if (facebook) {
       profileFields.social.facebook = facebook
@@ -214,7 +226,7 @@ router.post(`/update`, authMiddleware, async (req, res) => {
   }
 })
 
-router.post(`/settings/password`, authMiddleware, async (req, res) => {
+routerProfile.post(`/settings/password`, authMiddleware, async (req: Request, res: Response) => {
   try {
     const { currentPassword, newPassword } = req.body
 
@@ -231,6 +243,7 @@ router.post(`/settings/password`, authMiddleware, async (req, res) => {
     }
 
     user.password = await hash(newPassword, 10)
+
     await user.save()
 
     res.status(200).send(`Updated successfully`)
@@ -240,7 +253,7 @@ router.post(`/settings/password`, authMiddleware, async (req, res) => {
   }
 })
 
-router.post(`/settings/messagePopup`, authMiddleware, async (req, res) => {
+routerProfile.post(`/settings/messagePopup`, authMiddleware, async (_, res: Response) => {
   try {
     const user = await UserModel.findById(res.locals.userId)
 
@@ -257,5 +270,3 @@ router.post(`/settings/messagePopup`, authMiddleware, async (req, res) => {
     return res.status(500).send(`Server Error`)
   }
 })
-
-export default router

@@ -4,19 +4,17 @@ import next from 'next'
 import { createServer } from 'http'
 import socketIo from 'socket.io'
 
-dotenv.config()
-
-import { routerAuth, routerSignUp, routerSearch } from '~/api'
+import { routerAuth, routerSignUp, routerSearch, routerProfile } from '~/api'
 import routerPosts from '~/api/posts'
-import routerProfile from '~/api/profile'
 import routerNotifications from '~/api/notifications'
 import routerChats from '~/api/chats'
 import routerReset from '~/api/reset'
-
 import connectDb from '~/utilsServer/connectDb'
 import { addUser, removeUser, findConnectedUser } from '~/utilsServer/roomActions'
 import { loadMessages, sendMsg, setMsgToUnread, deleteMsg } from '~/utilsServer/messageActions'
 import { likeOrUnlikePost } from '~/utilsServer/likeOrUnlikePost'
+
+dotenv.config()
 
 const app = express()
 const server = createServer(app)
