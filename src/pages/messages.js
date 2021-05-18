@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import io from 'socket.io-client'
 import axios from 'axios'
 import cookie from 'js-cookie'
@@ -17,7 +17,7 @@ import getUserInfo from '../utils/getUserInfo'
 import newMsgSound from '../utils/newMsgSound'
 
 const scrollDivToBottom = (divRef) =>
-  divRef.current !== null && divRef.current.scrollIntoView({ behaviour: 'smooth' })
+  divRef.current !== null && divRef.current.scrollIntoView({ behaviour: `smooth` })
 
 function Messages({ chatsData, user }) {
   const [chats, setChats] = useState(chatsData)
@@ -27,23 +27,23 @@ function Messages({ chatsData, user }) {
   const [connectedUsers, setConnectedUsers] = useState([])
 
   const [messages, setMessages] = useState([])
-  const [bannerData, setBannerData] = useState({ name: '', profilePicUrl: '' })
+  const [bannerData, setBannerData] = useState({ name: ``, profilePicUrl: `` })
 
   const divRef = useRef()
 
   // This ref is for persisting the state of query string in url throughout re-renders. This ref is the value of query string inside url
-  const openChatId = useRef('')
+  const openChatId = useRef(``)
 
-  //CONNECTION useEffect
+  // CONNECTION useEffect
   useEffect(() => {
     if (!socket.current) {
       socket.current = io(baseUrl)
     }
 
     if (socket.current) {
-      socket.current.emit('join', { userId: user._id })
+      socket.current.emit(`join`, { userId: user._id })
 
-      socket.current.on('connectedUsers', ({ users }) => {
+      socket.current.on(`connectedUsers`, ({ users }) => {
         users.length > 0 && setConnectedUsers(users)
       })
 
@@ -56,7 +56,7 @@ function Messages({ chatsData, user }) {
 
     return () => {
       if (socket.current) {
-        socket.current.emit('disconnect')
+        socket.current.emit(`disconnect`)
         socket.current.off()
       }
     }
@@ -65,12 +65,12 @@ function Messages({ chatsData, user }) {
   // LOAD MESSAGES useEffect
   useEffect(() => {
     const loadMessages = () => {
-      socket.current.emit('loadMessages', {
+      socket.current.emit(`loadMessages`, {
         userId: user._id,
         messagesWith: router.query.message,
       })
 
-      socket.current.on('messagesLoaded', async ({ chat }) => {
+      socket.current.on(`messagesLoaded`, async ({ chat }) => {
         setMessages(chat.messages)
         setBannerData({
           name: chat.messagesWith.name,
@@ -81,7 +81,7 @@ function Messages({ chatsData, user }) {
         divRef.current && scrollDivToBottom(divRef)
       })
 
-      socket.current.on('noChatFound', async () => {
+      socket.current.on(`noChatFound`, async () => {
         const { name, profilePicUrl } = await getUserInfo(router.query.message)
 
         setBannerData({ name, profilePicUrl })
@@ -91,12 +91,14 @@ function Messages({ chatsData, user }) {
       })
     }
 
-    if (socket.current && router.query.message) loadMessages()
+    if (socket.current && router.query.message) {
+      loadMessages()
+    }
   }, [router.query.message])
 
   const sendMsg = (msg) => {
     if (socket.current) {
-      socket.current.emit('sendNewMsg', {
+      socket.current.emit(`sendNewMsg`, {
         userId: user._id,
         msgSendToUserId: openChatId.current,
         msg,
@@ -107,7 +109,7 @@ function Messages({ chatsData, user }) {
   // Confirming msg is sent and receving the messages useEffect
   useEffect(() => {
     if (socket.current) {
-      socket.current.on('msgSent', ({ newMsg }) => {
+      socket.current.on(`msgSent`, ({ newMsg }) => {
         if (newMsg.receiver === openChatId.current) {
           setMessages((prev) => [...prev, newMsg])
 
@@ -121,7 +123,7 @@ function Messages({ chatsData, user }) {
         }
       })
 
-      socket.current.on('newMsgReceived', async ({ newMsg }) => {
+      socket.current.on(`newMsgReceived`, async ({ newMsg }) => {
         let senderName
 
         // WHEN CHAT WITH SENDER IS CURRENTLY OPENED INSIDE YOUR BROWSER
@@ -155,7 +157,7 @@ function Messages({ chatsData, user }) {
             })
           }
 
-          //IF NO PREVIOUS CHAT WITH THE SENDER
+          // IF NO PREVIOUS CHAT WITH THE SENDER
           else {
             const { name, profilePicUrl } = await getUserInfo(newMsg.sender)
             senderName = name
@@ -182,13 +184,13 @@ function Messages({ chatsData, user }) {
 
   const deleteMsg = (messageId) => {
     if (socket.current) {
-      socket.current.emit('deleteMsg', {
+      socket.current.emit(`deleteMsg`, {
         userId: user._id,
         messagesWith: openChatId.current,
         messageId,
       })
 
-      socket.current.on('msgDeleted', () => {
+      socket.current.on(`msgDeleted`, () => {
         setMessages((prev) => prev.filter((message) => message._id !== messageId))
       })
     }
@@ -197,28 +199,28 @@ function Messages({ chatsData, user }) {
   const deleteChat = async (messagesWith) => {
     try {
       await axios.delete(`${baseUrl}/api/chats/${messagesWith}`, {
-        headers: { Authorization: cookie.get('token') },
+        headers: { Authorization: cookie.get(`token`) },
       })
 
       setChats((prev) => prev.filter((chat) => chat.messagesWith !== messagesWith))
-      router.push('/messages', undefined, { shallow: true })
+      router.push(`/messages`, undefined, { shallow: true })
     } catch (error) {
-      alert('Error deleting chat')
+      alert(`Error deleting chat`)
     }
   }
 
   return (
     <>
-      <Segment padded basic size="large" style={{ marginTop: '5px' }}>
+      <Segment padded basic size="large" style={{ marginTop: `5px` }}>
         <Header
           icon="home"
           content="Go Back!"
-          onClick={() => router.push('/')}
-          style={{ cursor: 'pointer' }}
+          onClick={() => router.push(`/`)}
+          style={{ cursor: `pointer` }}
         />
         <Divider hidden />
 
-        <div style={{ marginBottom: '10px' }}>
+        <div style={{ marginBottom: `10px` }}>
           <ChatListSearch chats={chats} setChats={setChats} />
         </div>
 
@@ -227,7 +229,7 @@ function Messages({ chatsData, user }) {
             <Grid stackable>
               <Grid.Column width={4}>
                 <Comment.Group size="big">
-                  <Segment raised style={{ overflow: 'auto', maxHeight: '32rem' }}>
+                  <Segment raised style={{ overflow: `auto`, maxHeight: `32rem` }}>
                     {chats.map((chat, i) => (
                       <Chat
                         key={i}
@@ -245,14 +247,14 @@ function Messages({ chatsData, user }) {
                   <>
                     <div
                       style={{
-                        overflow: 'auto',
-                        overflowX: 'hidden',
-                        maxHeight: '35rem',
-                        height: '35rem',
-                        backgroundColor: 'whitesmoke',
+                        overflow: `auto`,
+                        overflowX: `hidden`,
+                        maxHeight: `35rem`,
+                        height: `35rem`,
+                        backgroundColor: `whitesmoke`,
                       }}
                     >
-                      <div style={{ position: 'sticky', top: '0' }}>
+                      <div style={{ position: `sticky`, top: `0` }}>
                         <Banner bannerData={bannerData} />
                       </div>
 

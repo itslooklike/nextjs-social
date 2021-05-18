@@ -1,13 +1,15 @@
+import { v4 as uuid } from 'uuid'
+
 import { UserModel, ChatModel } from '~/models'
 
 export const loadMessages = async (userId, messagesWith) => {
   try {
-    const user = await ChatModel.findOne({ user: userId }).populate('chats.messagesWith')
+    const user = await ChatModel.findOne({ user: userId }).populate(`chats.messagesWith`)
 
-    const chat = user.chats.find((chat) => chat.messagesWith._id.toString() === messagesWith)
+    const chat = user.chats.find((item) => item.messagesWith._id.toString() === messagesWith)
 
     if (!chat) {
-      return { error: 'No chat found' }
+      return { error: `No chat found` }
     }
 
     return { chat }
@@ -19,13 +21,12 @@ export const loadMessages = async (userId, messagesWith) => {
 
 export const sendMsg = async (userId, msgSendToUserId, msg) => {
   try {
-    // LOGGED IN USER (SENDER)
     const user = await ChatModel.findOne({ user: userId })
 
-    // RECEIVER
     const msgSendToUser = await ChatModel.findOne({ user: msgSendToUserId })
 
     const newMsg = {
+      _id: uuid(), // FIXME: этого тут не должно быть, надо разобраться
       sender: userId,
       receiver: msgSendToUserId,
       msg,
@@ -37,9 +38,7 @@ export const sendMsg = async (userId, msgSendToUserId, msg) => {
     if (previousChat) {
       previousChat.messages.push(newMsg)
       await user.save()
-    }
-    //
-    else {
+    } else {
       const newChat = { messagesWith: msgSendToUserId, messages: [newMsg] }
       user.chats.unshift(newChat)
       await user.save()
@@ -52,9 +51,7 @@ export const sendMsg = async (userId, msgSendToUserId, msg) => {
     if (previousChatForReceiver) {
       previousChatForReceiver.messages.push(newMsg)
       await msgSendToUser.save()
-    }
-    //
-    else {
+    } else {
       const newChat = { messagesWith: userId, messages: [newMsg] }
       msgSendToUser.chats.unshift(newChat)
       await msgSendToUser.save()
@@ -86,13 +83,17 @@ export const deleteMsg = async (userId, messagesWith, messageId) => {
   try {
     const user = await ChatModel.findOne({ user: userId })
 
-    const chat = user.chats.find((chat) => chat.messagesWith.toString() === messagesWith)
+    const chat = user.chats.find((item) => item.messagesWith.toString() === messagesWith)
 
-    if (!chat) return
+    if (!chat) {
+      return
+    }
 
     const messageToDelete = chat.messages.find((message) => message._id.toString() === messageId)
 
-    if (!messageToDelete) return
+    if (!messageToDelete) {
+      return
+    }
 
     if (messageToDelete.sender.toString() !== userId) {
       return

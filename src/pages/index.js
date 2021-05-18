@@ -38,9 +38,9 @@ function Index({ user, postsData, errorLoading }) {
     }
 
     if (socket.current) {
-      socket.current.emit('join', { userId: user._id })
+      socket.current.emit(`join`, { userId: user._id })
 
-      socket.current.on('newMsgReceived', async ({ newMsg }) => {
+      socket.current.on(`newMsgReceived`, async ({ newMsg }) => {
         const { name, profilePicUrl } = await getUserInfo(newMsg.sender)
 
         if (user.newMessagePopup) {
@@ -55,11 +55,11 @@ function Index({ user, postsData, errorLoading }) {
       })
     }
 
-    document.title = `Welcome, ${user.name.split(' ')[0]}`
+    document.title = `Welcome, ${user.name.split(` `)[0]}`
 
     return () => {
       if (socket.current) {
-        socket.current.emit('disconnect')
+        socket.current.emit(`disconnect`)
         socket.current.off()
       }
     }
@@ -72,24 +72,28 @@ function Index({ user, postsData, errorLoading }) {
   const fetchDataOnScroll = async () => {
     try {
       const res = await axios.get(`${baseUrl}/api/posts`, {
-        headers: { Authorization: cookie.get('token') },
+        headers: { Authorization: cookie.get(`token`) },
         params: { pageNumber },
       })
 
-      if (res.data.length === 0) setHasMore(false)
+      if (res.data.length === 0) {
+        setHasMore(false)
+      }
 
       setPosts((prev) => [...prev, ...res.data])
       setPageNumber((prev) => prev + 1)
     } catch (error) {
-      alert('Error fetching Posts')
+      alert(`Error fetching Posts`)
     }
   }
 
-  if (posts.length === 0 || errorLoading) return <NoPosts />
+  if (posts.length === 0 || errorLoading) {
+    return <NoPosts />
+  }
 
   useEffect(() => {
     if (socket.current) {
-      socket.current.on('newNotificationReceived', ({ name, profilePicUrl, username, postId }) => {
+      socket.current.on(`newNotificationReceived`, ({ name, profilePicUrl, username, postId }) => {
         setNewNotification({ name, profilePicUrl, username, postId })
 
         showNotificationPopup(true)

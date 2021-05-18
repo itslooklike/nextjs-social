@@ -10,7 +10,7 @@ function MessageNotificationModal({
   newMessageReceived,
   user,
 }) {
-  const [text, setText] = useState('')
+  const [text, setText] = useState(``)
   const [loading, setLoading] = useState(false)
 
   const onModalClose = () => showNewMessageModal(false)
@@ -19,13 +19,13 @@ function MessageNotificationModal({
     e.preventDefault()
 
     if (socket.current) {
-      socket.current.emit('sendMsgFromNotification', {
+      socket.current.emit(`sendMsgFromNotification`, {
         userId: user._id,
         msgSendToUserId: newMessageReceived.sender,
         msg: text,
       })
 
-      socket.current.on('msgSentFromNotification', () => {
+      socket.current.on(`msgSentFromNotification`, () => {
         showNewMessageModal(false)
       })
     }
@@ -53,7 +53,7 @@ function MessageNotificationModal({
             <span className="other">{calculateTime(newMessageReceived.date)}</span>
           </div>
 
-          <div style={{ position: 'sticky', bottom: '0px' }}>
+          <div style={{ position: `sticky`, bottom: `0px` }}>
             <Segment secondary color="teal" attached="bottom">
               <Form reply onSubmit={formSubmit}>
                 <Form.Input
@@ -62,17 +62,17 @@ function MessageNotificationModal({
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   action={{
-                    color: 'blue',
-                    icon: 'telegram plane',
-                    disabled: text === '',
-                    loading: loading,
+                    color: `blue`,
+                    icon: `telegram plane`,
+                    disabled: text === ``,
+                    loading,
                   }}
                 />
               </Form>
             </Segment>
           </div>
 
-          <div style={{ marginTop: '5px' }}>
+          <div style={{ marginTop: `5px` }}>
             <Link href={`/messages?message=${newMessageReceived.sender}`}>
               <a>View All Messages</a>
             </Link>

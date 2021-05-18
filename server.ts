@@ -11,10 +11,10 @@ import {
   routerProfile,
   routerPosts,
   routerNotifications,
+  routerReset,
+  routerChats,
 } from '~/api'
 
-import routerChats from '~/api/chats'
-import routerReset from '~/api/reset'
 import connectDb from '~/utilsServer/connectDb'
 import { addUser, removeUser, findConnectedUser } from '~/utilsServer/roomActions'
 import { loadMessages, sendMsg, setMsgToUnread, deleteMsg } from '~/utilsServer/messageActions'

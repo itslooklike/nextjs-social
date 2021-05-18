@@ -1,14 +1,14 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { hash } from 'bcryptjs'
 import { createTransport } from 'nodemailer'
 import sendGridTransport from 'nodemailer-sendgrid-transport'
 import { randomBytes } from 'crypto'
-import isEmail from 'validator/lib/isEmail'
+import { isEmail } from 'validator'
 
 import { UserModel } from '~/models'
 import baseUrl from '~/utils/baseUrl'
 
-const router = Router()
+export const routerReset = Router()
 
 const options = {
   auth: {
@@ -18,7 +18,7 @@ const options = {
 
 const transporter = createTransport(sendGridTransport(options))
 
-router.post(`/`, async (req, res) => {
+routerReset.post(`/`, async (req: Request, res: Response) => {
   try {
     const { email } = req.body
 
@@ -35,6 +35,7 @@ router.post(`/`, async (req, res) => {
     const token = randomBytes(32).toString(`hex`)
 
     user.resetToken = token
+
     user.expireToken = Date.now() + 3600000
 
     await user.save()
@@ -43,7 +44,7 @@ router.post(`/`, async (req, res) => {
 
     const mailOptions = {
       to: user.email,
-      from: `singh.inder5880@gmail.com`,
+      from: `__EMAIL_HERE__`,
       subject: `Hi there! Password reset request`,
       html: `<p>Hey ${user.name
         .split(` `)[0]
@@ -51,7 +52,7 @@ router.post(`/`, async (req, res) => {
       <p>This token is valid for only 1 hour.</p>`,
     }
 
-    transporter.sendMail(mailOptions, (err, info) => err && console.log(err))
+    transporter.sendMail(mailOptions, (err) => err && console.log(err))
 
     return res.status(200).send(`Email sent successfully`)
   } catch (error) {
@@ -60,7 +61,7 @@ router.post(`/`, async (req, res) => {
   }
 })
 
-router.post(`/token`, async (req, res) => {
+routerReset.post(`/token`, async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body
 
@@ -96,5 +97,3 @@ router.post(`/token`, async (req, res) => {
     return res.status(500).send(`Server Error`)
   }
 })
-
-export default router

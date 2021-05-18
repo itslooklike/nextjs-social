@@ -1,11 +1,11 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 
 import { UserModel, ChatModel } from '~/models'
 import { authMiddleware } from '~/middleware'
 
-const router = Router()
+export const routerChats = Router()
 
-router.get(`/`, authMiddleware, async (req, res) => {
+routerChats.get(`/`, authMiddleware, async (_: Request, res: Response) => {
   try {
     const { userId } = res.locals
 
@@ -30,7 +30,7 @@ router.get(`/`, authMiddleware, async (req, res) => {
   }
 })
 
-router.get(`/user/:userToFindId`, authMiddleware, async (req, res) => {
+routerChats.get(`/user/:userToFindId`, authMiddleware, async (req: Request, res: Response) => {
   try {
     const user = await UserModel.findById(req.params.userToFindId)
 
@@ -45,7 +45,7 @@ router.get(`/user/:userToFindId`, authMiddleware, async (req, res) => {
   }
 })
 
-router.delete(`/:messagesWith`, authMiddleware, async (req, res) => {
+routerChats.delete(`/:messagesWith`, authMiddleware, async (req: Request, res: Response) => {
   try {
     const { userId } = res.locals
     const { messagesWith } = req.params
@@ -70,5 +70,3 @@ router.delete(`/:messagesWith`, authMiddleware, async (req, res) => {
     return res.status(500).send(`Server Error`)
   }
 })
-
-export default router
