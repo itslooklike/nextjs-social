@@ -4,7 +4,7 @@ import { hash } from 'bcryptjs'
 import { isEmail } from 'validator'
 
 import { UserModel, FollowerModel, ProfileModel, NotificationModel, ChatModel } from '~/models'
-import type { IUser, IProfileData } from '~/models'
+import type { IProfileData } from '~/models'
 
 const userPng = `https://res.cloudinary.com/indersingh/image/upload/v1593464618/App/user_mklcpl.png`
 
@@ -54,9 +54,7 @@ routerSignUp.post(`/`, async (req: Request, res: Response) => {
   }
 
   try {
-    let user: IUser
-
-    user = await UserModel.findOne({ email: email.toLowerCase() })
+    let user = await UserModel.findOne({ email: email.toLowerCase() })
 
     if (user) {
       return res.status(401).send(`User already registered`)

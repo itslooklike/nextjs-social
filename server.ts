@@ -6,8 +6,7 @@ import socketIo from 'socket.io'
 
 dotenv.config()
 
-import { routerAuth, routerSignUp } from '~/api'
-import routerSearch from '~/api/search'
+import { routerAuth, routerSignUp, routerSearch } from '~/api'
 import routerPosts from '~/api/posts'
 import routerProfile from '~/api/profile'
 import routerNotifications from '~/api/notifications'

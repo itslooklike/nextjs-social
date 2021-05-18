@@ -1,11 +1,11 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 
 import { authMiddleware } from '~/middleware'
 import { UserModel } from '~/models'
 
-const router = Router()
+export const routerSearch = Router()
 
-router.get(`/:searchText`, authMiddleware, async (req, res) => {
+routerSearch.get(`/:searchText`, authMiddleware, async (req: Request, res: Response) => {
   try {
     const { searchText } = req.params
     const { userId } = res.locals
@@ -23,11 +23,11 @@ router.get(`/:searchText`, authMiddleware, async (req, res) => {
     const resultsToBeSent =
       results.length > 0 && results.filter((result) => result._id.toString() !== userId)
 
-    return res.status(200).json(resultsToBeSent.length > 0 ? resultsToBeSent : results)
+    const data = resultsToBeSent.length > 0 ? resultsToBeSent : results
+
+    return res.status(200).json(data)
   } catch (error) {
     console.error(error)
     return res.status(500).send(`Server error`)
   }
 })
-
-export default router
