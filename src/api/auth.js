@@ -3,12 +3,12 @@ import { sign } from 'jsonwebtoken'
 import { compare } from 'bcryptjs'
 import { isEmail } from 'validator'
 
-import { UserModel, FollowerModel } from '../models'
-import { authMiddleware } from '../middleware'
+import { UserModel, FollowerModel } from '~/models'
+import { authMiddleware } from '~/middleware'
 
-const router = Router()
+export const routerAuth = Router()
 
-router.get('/', authMiddleware, async (req, res) => {
+routerAuth.get('/', authMiddleware, async (req, res) => {
   const { userId } = req
 
   try {
@@ -23,8 +23,12 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+routerAuth.post('/', async (req, res) => {
   const { email, password } = req.body.user
+
+  if (!email || !password) {
+    return res.status(401).send('No "email" and/or "password" send')
+  }
 
   if (!isEmail(email)) {
     return res.status(401).send('Invalid Email')
@@ -61,5 +65,3 @@ router.post('/', async (req, res) => {
     return res.status(500).send(`Server error`)
   }
 })
-
-export default router

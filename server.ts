@@ -6,19 +6,19 @@ import socketIo from 'socket.io'
 
 dotenv.config()
 
-import routerSignup from './api/signup'
-import routerAuth from './api/auth'
-import routerSearch from './api/search'
-import routerPosts from './api/posts'
-import routerProfile from './api/profile'
-import routerNotifications from './api/notifications'
-import routerChats from './api/chats'
-import routerReset from './api/reset'
+import routerSignup from '~/api/signup'
+import { routerAuth } from '~/api/auth'
+import routerSearch from '~/api/search'
+import routerPosts from '~/api/posts'
+import routerProfile from '~/api/profile'
+import routerNotifications from '~/api/notifications'
+import routerChats from '~/api/chats'
+import routerReset from '~/api/reset'
 
-import connectDb from './utilsServer/connectDb'
-import { addUser, removeUser, findConnectedUser } from './utilsServer/roomActions'
-import { loadMessages, sendMsg, setMsgToUnread, deleteMsg } from './utilsServer/messageActions'
-import { likeOrUnlikePost } from './utilsServer/likeOrUnlikePost'
+import connectDb from '~/utilsServer/connectDb'
+import { addUser, removeUser, findConnectedUser } from '~/utilsServer/roomActions'
+import { loadMessages, sendMsg, setMsgToUnread, deleteMsg } from '~/utilsServer/messageActions'
+import { likeOrUnlikePost } from '~/utilsServer/likeOrUnlikePost'
 
 const app = express()
 const server = createServer(app)

@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "ts-node -r tsconfig-paths/register -O '{\"module\":\"commonjs\"}' server.ts",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js"
+    "start": "NODE_ENV=production ts-node -r tsconfig-paths/register -O '{\"module\":\"commonjs\"}' server.ts"
   },
   "dependencies": {
     "@artsy/fresnel": "^1.5.0",

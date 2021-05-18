@@ -3,11 +3,11 @@ import { sign } from 'jsonwebtoken'
 import { hash } from 'bcryptjs'
 import isEmail from 'validator/lib/isEmail'
 
-import { UserModel } from '../models/UserModel'
-import ProfileModel from '../models/ProfileModel'
-import FollowerModel from '../models/FollowerModel'
-import NotificationModel from '../models/NotificationModel'
-import ChatModel from '../models/ChatModel'
+import { UserModel } from '~/models/UserModel'
+import ProfileModel from '~/models/ProfileModel'
+import FollowerModel from '~/models/FollowerModel'
+import NotificationModel from '~/models/NotificationModel'
+import ChatModel from '~/models/ChatModel'
 
 const userPng = 'https://res.cloudinary.com/indersingh/image/upload/v1593464618/App/user_mklcpl.png'
 
