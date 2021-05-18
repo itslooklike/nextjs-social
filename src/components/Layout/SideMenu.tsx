@@ -25,7 +25,7 @@ function SideMenu({ user: { unreadNotification, email, unreadMessage, username }
             <Icon
               name={unreadMessage ? `hand point right` : `mail outline`}
               size="large"
-              color={(isActive(`/messages`) && `teal`) || (unreadMessage && `orange`)}
+              color={(isActive(`/messages`) && `teal`) || (unreadMessage ? `orange` : undefined)}
             />
             <List.Content>{pc && <List.Header content="Messages" />}</List.Content>
           </List.Item>
@@ -37,7 +37,10 @@ function SideMenu({ user: { unreadNotification, email, unreadMessage, username }
             <Icon
               name={unreadNotification ? `hand point right` : `bell outline`}
               size="large"
-              color={(isActive(`/notifications`) && `teal`) || (unreadNotification && `orange`)}
+              color={
+                (isActive(`/notifications`) && `teal`) ||
+                (unreadNotification ? `orange` : undefined)
+              }
             />
             <List.Content>{pc && <List.Header content="Notifications" />}</List.Content>
           </List.Item>
