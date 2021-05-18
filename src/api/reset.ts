@@ -5,8 +5,8 @@ import sendGridTransport from 'nodemailer-sendgrid-transport'
 import { randomBytes } from 'crypto'
 import isEmail from 'validator/lib/isEmail'
 
-import { UserModel } from '../models/UserModel'
-import baseUrl from '../utils/baseUrl'
+import { UserModel } from '~/models'
+import baseUrl from '~/utils/baseUrl'
 
 const router = Router()
 

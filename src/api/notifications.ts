@@ -1,14 +1,15 @@
 import { Router } from 'express'
+
+import { authMiddleware } from '~/middleware'
+import { UserModel, NotificationModel } from '~/models'
+
 const router = Router()
-import { authMiddleware } from '../middleware'
-import { findOne } from '../models/NotificationModel'
-import { UserModel } from '../models/UserModel'
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const { userId } = req
 
-    const user = await findOne({ user: userId })
+    const user = await NotificationModel.findOne({ user: userId })
       .populate('notifications.user')
       .populate('notifications.post')
 

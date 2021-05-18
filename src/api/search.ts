@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
-import { authMiddleware } from '../middleware'
-import { UserModel } from '../models/UserModel'
+import { authMiddleware } from '~/middleware'
+import { UserModel } from '~/models'
 
 const router = Router()
 

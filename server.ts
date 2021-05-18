@@ -6,8 +6,7 @@ import socketIo from 'socket.io'
 
 dotenv.config()
 
-import routerSignup from '~/api/signup'
-import { routerAuth } from '~/api/auth'
+import { routerAuth, routerSignUp } from '~/api'
 import routerSearch from '~/api/search'
 import routerPosts from '~/api/posts'
 import routerProfile from '~/api/profile'
@@ -111,7 +110,7 @@ io.on('connection', (socket) => {
 })
 
 nextApp.prepare().then(() => {
-  app.use('/api/signup', routerSignup)
+  app.use('/api/signup', routerSignUp)
   app.use('/api/auth', routerAuth)
   app.use('/api/search', routerSearch)
   app.use('/api/posts', routerPosts)

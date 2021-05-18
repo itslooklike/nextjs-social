@@ -17,4 +17,4 @@ const ChatSchema = new Schema({
   ],
 })
 
-export default model('Chat', ChatSchema)
+export const ChatModel = model('Chat', ChatSchema)

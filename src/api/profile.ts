@@ -1,11 +1,8 @@
 import { Router } from 'express'
 import { compare, hash } from 'bcryptjs'
 
-import { authMiddleware } from '../middleware'
-import { UserModel } from '../models/UserModel'
-import { find } from '../models/PostModel'
-import { findOne as _findOne } from '../models/FollowerModel'
-import { findOne as __findOne, findOneAndUpdate } from '../models/ProfileModel'
+import { authMiddleware } from '~/middleware'
+import { UserModel, PostModel, FollowerModel, ProfileModel } from '~/models'
 import {
   newFollowerNotification,
   removeFollowerNotification,
@@ -22,9 +19,9 @@ router.get('/:username', authMiddleware, async (req, res) => {
       return res.status(404).send('No User Found')
     }
 
-    const profile = await __findOne({ user: user._id }).populate('user')
+    const profile = await ProfileModel.findOne({ user: user._id }).populate('user')
 
-    const profileFollowStats = await _findOne({ user: user._id })
+    const profileFollowStats = await FollowerModel.findOne({ user: user._id })
 
     return res.json({
       profile,
@@ -50,7 +47,7 @@ router.get(`/posts/:username`, authMiddleware, async (req, res) => {
       return res.status(404).send('No User Found')
     }
 
-    const posts = await find({ user: user._id })
+    const posts = await PostModel.find({ user: user._id })
       .sort({ createdAt: -1 })
       .populate('user')
       .populate('comments.user')
@@ -66,7 +63,7 @@ router.get('/followers/:userId', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params
 
-    const user = await _findOne({ user: userId }).populate('followers.user')
+    const user = await FollowerModel.findOne({ user: userId }).populate('followers.user')
 
     return res.json(user.followers)
   } catch (error) {
@@ -79,7 +76,7 @@ router.get('/following/:userId', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params
 
-    const user = await _findOne({ user: userId }).populate('following.user')
+    const user = await FollowerModel.findOne({ user: userId }).populate('following.user')
 
     return res.json(user.following)
   } catch (error) {
@@ -93,8 +90,8 @@ router.post('/follow/:userToFollowId', authMiddleware, async (req, res) => {
     const { userId } = req
     const { userToFollowId } = req.params
 
-    const user = await _findOne({ user: userId })
-    const userToFollow = await _findOne({ user: userToFollowId })
+    const user = await FollowerModel.findOne({ user: userId })
+    const userToFollow = await FollowerModel.findOne({ user: userToFollowId })
 
     if (!user || !userToFollow) {
       return res.status(404).send('User not found')
@@ -128,11 +125,11 @@ router.put('/unfollow/:userToUnfollowId', authMiddleware, async (req, res) => {
     const { userId } = req
     const { userToUnfollowId } = req.params
 
-    const user = await _findOne({
+    const user = await FollowerModel.findOne({
       user: userId,
     })
 
-    const userToUnfollow = await _findOne({
+    const userToUnfollow = await FollowerModel.findOne({
       user: userToUnfollowId,
     })
 
@@ -193,7 +190,7 @@ router.post('/update', authMiddleware, async (req, res) => {
 
     if (twitter) profileFields.social.twitter = twitter
 
-    await findOneAndUpdate({ user: userId }, { $set: profileFields }, { new: true })
+    await ProfileModel.findOneAndUpdate({ user: userId }, { $set: profileFields }, { new: true })
 
     if (profilePicUrl) {
       const user = await UserModel.findById(userId)

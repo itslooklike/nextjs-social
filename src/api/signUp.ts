@@ -1,31 +1,33 @@
 import { Router } from 'express'
 import { sign } from 'jsonwebtoken'
 import { hash } from 'bcryptjs'
-import isEmail from 'validator/lib/isEmail'
+import { isEmail } from 'validator'
 
-import { UserModel } from '~/models/UserModel'
-import ProfileModel from '~/models/ProfileModel'
-import FollowerModel from '~/models/FollowerModel'
-import NotificationModel from '~/models/NotificationModel'
-import ChatModel from '~/models/ChatModel'
+import { UserModel, FollowerModel, ProfileModel, NotificationModel, ChatModel } from '~/models'
 
 const userPng = 'https://res.cloudinary.com/indersingh/image/upload/v1593464618/App/user_mklcpl.png'
 
 const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/
 
-const router = Router()
+export const routerSignUp = Router()
 
-router.get('/:username', async (req, res) => {
+routerSignUp.get('/:username', async (req, res) => {
   const { username } = req.params
 
+  if (username.length < 1) {
+    return res.status(401).send('Invalid')
+  }
+
+  if (!regexUserName.test(username)) {
+    return res.status(401).send('Invalid')
+  }
+
   try {
-    if (username.length < 1) return res.status(401).send('Invalid')
-
-    if (!regexUserName.test(username)) return res.status(401).send('Invalid')
-
     const user = await UserModel.findOne({ username: username.toLowerCase() })
 
-    if (user) return res.status(401).send('Username already taken')
+    if (user) {
+      return res.status(401).send('Username already taken')
+    }
 
     return res.status(200).send('Available')
   } catch (error) {
@@ -34,7 +36,7 @@ router.get('/:username', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+routerSignUp.post('/', async (req, res) => {
   const { name, email, username, password, bio, facebook, youtube, twitter, instagram } =
     req.body.user
 
@@ -46,7 +48,9 @@ router.post('/', async (req, res) => {
 
   try {
     let user
+
     user = await UserModel.findOne({ email: email.toLowerCase() })
+
     if (user) {
       return res.status(401).send('User already registered')
     }
@@ -60,19 +64,29 @@ router.post('/', async (req, res) => {
     })
 
     user.password = await hash(password, 10)
+
     await user.save()
 
-    let profileFields = {}
+    const profileFields: any = {}
+
     profileFields.user = user._id
 
     profileFields.bio = bio
 
     profileFields.social = {}
 
-    if (facebook) profileFields.social.facebook = facebook
-    if (youtube) profileFields.social.youtube = youtube
-    if (instagram) profileFields.social.instagram = instagram
-    if (twitter) profileFields.social.twitter = twitter
+    if (facebook) {
+      profileFields.social.facebook = facebook
+    }
+    if (youtube) {
+      profileFields.social.youtube = youtube
+    }
+    if (instagram) {
+      profileFields.social.instagram = instagram
+    }
+    if (twitter) {
+      profileFields.social.twitter = twitter
+    }
 
     await new ProfileModel(profileFields).save()
     await new FollowerModel({ user: user._id, followers: [], following: [] }).save()
@@ -89,5 +103,3 @@ router.post('/', async (req, res) => {
     return res.status(500).send(`Server error`)
   }
 })
-
-export default router

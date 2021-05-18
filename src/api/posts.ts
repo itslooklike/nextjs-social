@@ -1,10 +1,8 @@
 import { Router } from 'express'
 import { v4 as uuid } from 'uuid'
 
-import { authMiddleware } from '../middleware'
-import { UserModel } from '../models/UserModel'
-import { findOne } from '../models/FollowerModel'
-import PostModel, { findById as _findById, find } from '../models/PostModel'
+import { authMiddleware } from '~/middleware'
+import { UserModel, FollowerModel, PostModel } from '~/models'
 import {
   newLikeNotification,
   removeLikeNotification,
@@ -24,12 +22,18 @@ router.post('/', authMiddleware, async (req, res) => {
       user: req.userId,
       text,
     }
-    if (location) newPost.location = location
-    if (picUrl) newPost.picUrl = picUrl
+
+    if (location) {
+      newPost.location = location
+    }
+
+    if (picUrl) {
+      newPost.picUrl = picUrl
+    }
 
     const post = await new PostModel(newPost).save()
 
-    const postCreated = await _findById(post._id).populate('user')
+    const postCreated = await PostModel.findById(post._id).populate('user')
 
     return res.json(postCreated)
   } catch (error) {
@@ -72,7 +76,7 @@ router.get('/', authMiddleware, async (req, res) => {
     let postsToBeSent = []
     const { userId } = req
 
-    const loggedUser = await findOne({ user: userId })
+    const loggedUser = await FollowerModel.findOne({ user: userId })
 
     if (loggedUser.following.length === 0) {
       postsToBeSent = posts.filter((post) => post.user._id.toString() === userId)
@@ -102,7 +106,9 @@ router.get('/', authMiddleware, async (req, res) => {
 
 router.get('/:postId', authMiddleware, async (req, res) => {
   try {
-    const post = await _findById(req.params.postId).populate('user').populate('comments.user')
+    const post = await PostModel.findById(req.params.postId)
+      .populate('user')
+      .populate('comments.user')
 
     if (!post) {
       return res.status(404).send('Post not found')
@@ -121,7 +127,7 @@ router.delete('/:postId', authMiddleware, async (req, res) => {
 
     const { postId } = req.params
 
-    const post = await _findById(postId)
+    const post = await PostModel.findById(postId)
     if (!post) {
       return res.status(404).send('post not found')
     }
@@ -150,7 +156,7 @@ router.post('/like/:postId', authMiddleware, async (req, res) => {
     const { postId } = req.params
     const { userId } = req
 
-    const post = await _findById(postId)
+    const post = await PostModel.findById(postId)
     if (!post) {
       return res.status(404).send('No Post found')
     }
@@ -180,7 +186,7 @@ router.put('/unlike/:postId', authMiddleware, async (req, res) => {
     const { postId } = req.params
     const { userId } = req
 
-    const post = await _findById(postId)
+    const post = await PostModel.findById(postId)
     if (!post) {
       return res.status(404).send('No Post found')
     }
@@ -212,7 +218,7 @@ router.get('/like/:postId', authMiddleware, async (req, res) => {
   try {
     const { postId } = req.params
 
-    const post = await _findById(postId).populate('likes.user')
+    const post = await PostModel.findById(postId).populate('likes.user')
     if (!post) {
       return res.status(404).send('No Post found')
     }
@@ -233,7 +239,7 @@ router.post('/comment/:postId', authMiddleware, async (req, res) => {
 
     if (text.length < 1) return res.status(401).send('Comment should be atleast 1 character')
 
-    const post = await _findById(postId)
+    const post = await PostModel.findById(postId)
 
     if (!post) return res.status(404).send('Post not found')
 
@@ -263,7 +269,7 @@ router.delete('/:postId/:commentId', authMiddleware, async (req, res) => {
     const { postId, commentId } = req.params
     const { userId } = req
 
-    const post = await _findById(postId)
+    const post = await PostModel.findById(postId)
     if (!post) return res.status(404).send('Post not found')
 
     const comment = post.comments.find((comment) => comment._id === commentId)
