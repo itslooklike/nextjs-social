@@ -1,11 +1,11 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 
 import { authMiddleware } from '~/middleware'
 import { UserModel, NotificationModel } from '~/models'
 
-const router = Router()
+export const routerNotifications = Router()
 
-router.get(`/`, authMiddleware, async (req, res) => {
+routerNotifications.get(`/`, authMiddleware, async (_: Request, res: Response) => {
   try {
     const { userId } = res.locals
 
@@ -20,7 +20,7 @@ router.get(`/`, authMiddleware, async (req, res) => {
   }
 })
 
-router.post(`/`, authMiddleware, async (req, res) => {
+routerNotifications.post(`/`, authMiddleware, async (_: Request, res: Response) => {
   try {
     const { userId } = res.locals
 
@@ -36,5 +36,3 @@ router.post(`/`, authMiddleware, async (req, res) => {
     return res.status(500).send(`Server Error`)
   }
 })
-
-export default router

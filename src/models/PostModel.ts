@@ -17,7 +17,7 @@ export interface IPostData {
   comments?: IComment[]
 }
 
-interface IPost extends Document, IPostData {}
+export interface IPost extends Document, IPostData {}
 
 const PostSchema = new Schema(
   {
